@@ -4,10 +4,10 @@ const b32 = require("hi-base32");
 const DHT = require("@hyperswarm/dht");
 const pump = require('pump')
 const node = new DHT({});
-
 const http = require('http');
 const httpProxy = require('http-proxy');
 
+//http
 let mod = 0;
 const tunnels = {};
 var proxy = httpProxy.createProxyServer({
@@ -41,27 +41,22 @@ const doServer = async function (req, res) {
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('Cannot reach node ' + e.message);
   });
-
 }
 var server = http.createServer(doServer);
 server.listen(80);
-const getKey = (name)=>{
-  let publicKey;
-  let decoded = '';
-  try {decoded = b32.decode.asBytes(name.toUpperCase())} catch (e) {
-          console.error(e)
-  }
-  if (decoded.length == 32) publicKey = Buffer.from(decoded);
-  return publicKey;
-}
-
+//https
 net.createServer(function (local) {
   local.once("data", async function (data) {
     const server = sni(data);
     if (server) {
       const split = server.split('.');
       if (split[split.length - 3]) {
-        let domain = await getKey(split[split.length - 3]);
+        let name = split[split.length - 3];
+        let domain = '';
+        try {domain = b32.decode.asBytes(name.toUpperCase())} catch (e) {
+          console.error(e)
+        }
+        if (domain.length == 32) publicKey = Buffer.from(decoded);
         if (!domain) return;
         const socket = node.connect(domain);
         socket.write('https');

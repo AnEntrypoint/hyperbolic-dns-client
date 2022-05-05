@@ -66,8 +66,8 @@ module.exports = (key, target)=>{
               httpServer.listen(http, "0.0.0.0", function() {
                   console.info("Listening on ", httpServer.address());
                   done();
-                  console.log('listening on http '+http);
                   http = port;
+                  console.log('listening on http '+http);
               });
         } catch(e) {
               console.error(e);

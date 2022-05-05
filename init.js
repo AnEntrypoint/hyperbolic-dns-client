@@ -24,11 +24,11 @@ const checks = async ()=>{
   const ask = (q)=>{
     return new Promise(res=>{rl.question(q, result=>res(result))});
   }
-  const password = process.env.password
+  let password = process.env.password
   if(!password) password = await ask('Enter your private seed for key generation');
-  const email = process.env.email;
+  let email = process.env.email;
   if(!email) email = await ask('Enter your contact email');
-  const target = process.env.target;
+  let target = process.env.target;
   if(!target) await ask('enter the target address');
   
   run(password, email, target);

@@ -24,9 +24,13 @@ const checks = async ()=>{
   const ask = (q)=>{
     return new Promise(res=>{rl.question(q, result=>res(result))});
   }
-  const password = process.env.password || await ask('Enter your private seed for key generation');
-  const email = process.env.email || await ask('Enter your contact email');
-  const target = process.env.target || await ask('Enter your private seed for key generation');
+  const password = process.env.password
+  if(!password) await ask('Enter your private seed for key generation');
+  const email = process.env.email;
+  if(!email) await ask('Enter your contact email');
+  const target = process.env.target;
+  if(!target) await ask('Enter your private seed for key generation');
+  
   run(password, email, target);
   rl.on('close', function () {
     process.exit(0);

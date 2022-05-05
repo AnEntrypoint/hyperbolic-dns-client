@@ -34,4 +34,4 @@ const checks = async ()=>{
   rl.close();
 }
 
-
+checks();

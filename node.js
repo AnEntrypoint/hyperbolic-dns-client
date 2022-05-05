@@ -65,7 +65,7 @@ module.exports = (key, target)=>{
       while(!http) {
         try {
               let port = 10240+parseInt(Math.random()*10240);
-              httpServer.listen(http, "0.0.0.0", function() {
+              httpServer.listen(port, "0.0.0.0", function() {
                   http = port;
                   if(http && https) done();
                   console.log('listening on http '+http);

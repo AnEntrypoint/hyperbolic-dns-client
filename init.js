@@ -27,7 +27,7 @@ const checks = async ()=>{
   const password = process.env.password || await ask('Enter your private seed for key generation');
   const email = process.env.email || await ask('Enter your contact email');
   const target = process.env.target || await ask('Enter your private seed for key generation');
-  run(process.env.PASSWORD, process.env.EMAIL, process.env.ADDRESS);
+  run(password, email, target);
   rl.on('close', function () {
     process.exit(0);
   });

@@ -51,10 +51,11 @@ module.exports = (key, target)=>{
                   httpsServer.listen(port, "0.0.0.0", function() {
                       console.info("Listening on ", httpsServer.address());
                       done();
+                      https = port;
+                      console.log('listening on https '+https);
                   });
             } catch(e) {
                   console.error(e);
-                  console.log('listening on https '+https);
             }
             await new Promise(res=>{setTimeout(res, 1000)});
       }
@@ -66,6 +67,7 @@ module.exports = (key, target)=>{
                   console.info("Listening on ", httpServer.address());
                   done();
                   console.log('listening on http '+http);
+                  http = port;
               });
         } catch(e) {
               console.error(e);

@@ -25,7 +25,6 @@ const serve = (key, port, secureport, addr) => {
 
 const out = serve().serve(process.env.KEY, 2080, 2443, "127.0.0.1");
 console.log('listening', b32.encode(out).replace('====','').toLowerCase());
-console.log('hex', out);
 
 var app = require("./app.js");
  
@@ -33,7 +32,6 @@ require("greenlock-express")
     .init({
       packageRoot: __dirname,
       configDir: "./greenlock.d",
-      maintainerEmail: "jon@example.com",
       cluster: false
   })
     .ready(httpsWorker);

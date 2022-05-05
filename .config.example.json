@@ -1,5 +1,0 @@
-{
-  tunnels: [
-    'thisisyoursecretkey':'https://example.org'
-  ]
-}

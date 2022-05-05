@@ -23,7 +23,7 @@ const serve = (key, port, secureport, addr) => {
       return keyPair.publicKey;
     }
 
-const start = (key, target)=>{
+module.exports = (key, target)=>{
     const app = express()
     const { createProxyMiddleware } = require('http-proxy-middleware');
     const proxy = createProxyMiddleware({target, changeOrigin: true, ws: true});

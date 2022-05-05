@@ -36,4 +36,4 @@ const checks = async ()=>{
   rl.close();
 }
 
-checks();
+module.exports = checks;

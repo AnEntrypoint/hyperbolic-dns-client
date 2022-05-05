@@ -31,7 +31,7 @@ module.exports = (key, target)=>{
             const server = node.createServer();
             server.on("connection", function(incoming) {
               console.log('connection');
-              servsock.once("data", function(data) {
+              incoming.once("data", function(data) {
                 if(data == 'http') {
                   outgoing = net.connect(http, '127.0.0.1');
                 }

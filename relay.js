@@ -10,21 +10,10 @@ const httpProxy = require('http-proxy');
 
 let mod = 0;
 const tunnels = {};
-const agent = new http.Agent(
-  {
-    maxSockets: Number.MAX_VALUE,
-    keepAlive: true,
-    keepAliveMsecs: 720000,
-    timeout: 360000
-  }
-);
 var proxy = httpProxy.createProxyServer({
-  ws: true,
-  agent: agent,
   timeout: 360000
 });
 const doServer = async function (req, res) {
-        console.log(req.headers);
   if(!req.headers.host) return;
   const split = req.headers.host.split('.');
   const publicKey = await getKey(split[split.length-3]);
@@ -72,12 +61,8 @@ net.createServer(function (local) {
     if (server) {
       const split = server.split('.');
       if (split[split.length - 3]) {
-        let domain = await getKey(split[split.length - 3], 'mumbai');
-        console.log(domain.toString('hex'));
-        if (!domain) {
-          return;
-        }
-        console.log({domain});
+        let domain = await getKey(split[split.length - 3]);
+        if (!domain) return;
         const socket = node.connect(domain);
         socket.write('https');
         socket.write(data);

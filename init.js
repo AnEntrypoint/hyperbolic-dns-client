@@ -2,11 +2,6 @@ const fs = require('fs');
 const b32 = require('hi-base32');
 const crypto = require("hypercore-crypto");
 
-const readline = require('readline');
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
 
 const run = (password, email, address)=>{
   const keyPair = crypto.keyPair(crypto.data(Buffer.from(password)));
@@ -20,18 +15,20 @@ const run = (password, email, address)=>{
 }
 
 
-const args = process.argv.slice(2);
-if(args.length && args[0] == '-q') {
-  rl.question('Enter a unique private seed: ', function (password) {
-    rl.question('Enter your contact email: ', function (email) {
-      rl.question('Enter the destination address (e.g. https://example.org: ', function (address) {
-        run(password, email, address);
-        rl.close();
-      })
-    })
+const checks = async ()=>{
+  const readline = require('readline');
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
   });
-} else {
+  const ask = (q)=>{
+    return new Promise(res=>{rl.question(q, result=>res(result))});
+  }
+  const password = process.env.password || ask('Enter your private seed for key generation');
+  const email = process.env.email || ask('Enter your contact email');
+  const target = process.env.target || ask('Enter your private seed for key generation');
   run(process.env.PASSWORD, process.env.EMAIL, process.env.ADDRESS)
+  rl.close();
 }
 
 rl.on('close', function () {

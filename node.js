@@ -1,7 +1,6 @@
 "use strict";
 var b32 = require("hi-base32");
 require('dotenv').config()
-console.log(process.argv.length)
 
 const serve = (key, port, secureport, addr) => {
       const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
@@ -32,7 +31,7 @@ module.exports = (key, target)=>{
     require("greenlock-express")
       .init({
         packageRoot: __dirname,
-        configDir: "./greenlock.d",
+        configDir: "./sites/"+,
         cluster: false
     }).ready(httpsWorker);
 

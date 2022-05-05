@@ -17,6 +17,7 @@ module.exports = (key, target)=>{
       .init({
         packageRoot: __dirname,
         configDir: "./sites/"+b32pub,
+        maintainerEmail: "jon@example.com",
         cluster: false
     }).ready(httpsWorker);
     async function httpsWorker(glx) {

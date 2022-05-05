@@ -33,6 +33,7 @@ module.exports = (key, target)=>{
             server.on("connection", function(incoming) {
               console.log('connection');
               incoming.once("data", function(data) {
+                let outgoing;
                 if(data == 'http') {
                   outgoing = net.connect(http, '127.0.0.1');
                 }

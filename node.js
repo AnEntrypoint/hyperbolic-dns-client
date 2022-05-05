@@ -23,45 +23,54 @@ const serve = (key, port, secureport, addr) => {
       return keyPair.publicKey;
     }
 
-require("greenlock-express")
-    .init({
-      packageRoot: __dirname,
-      configDir: "./greenlock.d",
-      cluster: false
-  }).ready(httpsWorker);
-var app = require("./app.js");
-async function httpsWorker(glx) {
-    let https = 0;
-    let http = 0;
-    const done = ()=>{
-          const out = serve().serve(process.env.KEY, http, https, "127.0.0.1");
-          console.log('listening', b32.encode(out).replace('====','').toLowerCase());
-    }
-    var httpsServer = glx.httpsServer(null, app);
-    while(!http) {
-          try {
-                let port = 10240+parseInt(Math.random()*10240);
-                httpsServer.listen(port, "0.0.0.0", function() {
-                    console.info("Listening on ", httpsServer.address());
-                    done();
-                });
-          } catch(e) {
-                await new Promise(res=>{setTimeout(res, 1000)});
-          }
-    }
+const start = (key, target)=>{
+    const app = express()
+    const { createProxyMiddleware } = require('http-proxy-middleware');
+    const proxy = createProxyMiddleware({target, changeOrigin: true, ws: true});
+    app.use('/', proxy);
 
-    var httpServer = glx.httpServer();
-    while(!https) {
-          try {
-                let port = 10240+parseInt(Math.random()*10240);
-                httpServer.listen(http, "0.0.0.0", function() {
-                    console.info("Listening on ", httpServer.address());
-                    done();
-                });
-          } catch(e) {
-                await new Promise(res=>{setTimeout(res, 1000)});
-          }
-                
-    }
+    require("greenlock-express")
+      .init({
+        packageRoot: __dirname,
+        configDir: "./greenlock.d",
+        cluster: false
+    }).ready(httpsWorker);
 
+    async function httpsWorker(glx) {
+      let https = 0;
+      let http = 0;
+      const done = ()=>{
+            const out = serve().serve(process.env.KEY, http, https, "127.0.0.1");
+            console.log('listening', b32.encode(out).replace('====','').toLowerCase());
+      }
+      var httpsServer = glx.httpsServer(null, app);
+      while(!http) {
+            try {
+                  let port = 10240+parseInt(Math.random()*10240);
+                  httpsServer.listen(port, "0.0.0.0", function() {
+                      console.info("Listening on ", httpsServer.address());
+                      done();
+                  });
+            } catch(e) {
+                  console.error(e);
+                  await new Promise(res=>{setTimeout(res, 1000)});
+            }
+      }
+
+      var httpServer = glx.httpServer();
+      while(!https) {
+        try {
+              let port = 10240+parseInt(Math.random()*10240);
+              httpServer.listen(http, "0.0.0.0", function() {
+                  console.info("Listening on ", httpServer.address());
+                  done();
+              });
+        } catch(e) {
+              console.error(e);
+              await new Promise(res=>{setTimeout(res, 1000)});
+        }
+
+      }
+
+    }
 }

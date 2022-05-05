@@ -29,7 +29,7 @@ const checks = async ()=>{
   let email = process.env.email;
   if(!email) email = await ask('Enter your contact email: ');
   let target = process.env.target;
-  if(!target) await ask('enter the target address: ');
+  if(!target) target = await ask('enter the target address: ');
   
   run(password, email, target);
 

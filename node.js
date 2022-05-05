@@ -3,7 +3,7 @@
 const fs = require('fs');
 const b32 = require('hi-base32');
 const crypto = require("hypercore-crypto");
-
+const express = require("express");
 require('dotenv').config()
 
 module.exports = (key, target)=>{

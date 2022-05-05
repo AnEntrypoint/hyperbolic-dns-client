@@ -4,6 +4,7 @@ const fs = require('fs');
 const b32 = require('hi-base32');
 const crypto = require("hypercore-crypto");
 const express = require("express");
+const DHT = require("@hyperswarm/dht");
 const node = new DHT({});
 
 require('dotenv').config()

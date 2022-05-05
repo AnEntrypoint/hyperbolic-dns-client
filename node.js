@@ -5,6 +5,7 @@ const b32 = require('hi-base32');
 const crypto = require("hypercore-crypto");
 const express = require("express");
 const net = require("net");
+const pump = require("pump");
 const DHT = require("@hyperswarm/dht");
 const node = new DHT({});
 

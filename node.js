@@ -52,8 +52,8 @@ module.exports = (key, target)=>{
             try {
                   let port = 10240+parseInt(Math.random()*10240);
                   httpsServer.listen(port, "0.0.0.0", function() {
-                      if(http && https) done();
                       https = port;
+                      if(http && https) done();
                       console.log('listening on https '+https);
                   });
             } catch(e) {
@@ -66,8 +66,8 @@ module.exports = (key, target)=>{
         try {
               let port = 10240+parseInt(Math.random()*10240);
               httpServer.listen(http, "0.0.0.0", function() {
-                  if(http && https) done();
                   http = port;
+                  if(http && https) done();
                   console.log('listening on http '+http);
               });
         } catch(e) {

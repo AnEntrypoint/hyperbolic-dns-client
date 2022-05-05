@@ -16,7 +16,7 @@ rl.question('Enter a unique private seed: ', function (password) {
       console.log('Address will be: ', bkey+".matic.ml");
       fs.mkdirSync('sites/'+bkey+'/', { recursive: true }, (err) => {console.log(err)});
       fs.writeFileSync('.env', 'KEY='+password);
-      fs.writeFileSync('sites/bkey/hyperconfig.json', JSON.stringify({key:password, target:address}]}));
+      fs.writeFileSync('sites/'+bkey+'/hyperconfig.json', JSON.stringify({key:password, target:address}]}));
       fs.writeFileSync('greenlock.d/config.json', JSON.stringify({sites:[{subject:bkey+".matic.ml"}]}));
       fs.writeFileSync('address', bkey+".matic.ml");
       rl.close();

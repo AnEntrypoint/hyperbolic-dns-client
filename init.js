@@ -17,7 +17,7 @@ rl.question('Enter a unique private seed: ', function (password) {
       fs.mkdirSync('sites/'+bkey+'/', { recursive: true }, (err) => {console.log(err)});
       fs.writeFileSync('.env', 'KEY='+password);
       fs.writeFileSync('sites/'+bkey+'/hyperconfig.json', JSON.stringify({key:password, target:address}));
-      fs.writeFileSync('sites/'+bkey+'/config.json', JSON.stringify({sites:[{subject:bkey+".matic.ml"}]}));
+      fs.writeFileSync('sites/'+bkey+'/config.json', JSON.stringify({sites:[{subject:bkey+".matic.ml"}], maintainerEmail:email}));
       fs.writeFileSync('address', bkey+".matic.ml");
       rl.close();
     })

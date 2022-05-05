@@ -41,7 +41,7 @@ module.exports = (key, target)=>{
             console.log('listening', b32pub);
       }
       var httpsServer = glx.httpsServer(null, app);
-      while(!http) {
+      while(!https) {
             try {
                   let port = 10240+parseInt(Math.random()*10240);
                   httpsServer.listen(port, "0.0.0.0", function() {
@@ -50,21 +50,23 @@ module.exports = (key, target)=>{
                   });
             } catch(e) {
                   console.error(e);
-                  await new Promise(res=>{setTimeout(res, 1000)});
+                  console.log('listening on https '+https);
             }
+            await new Promise(res=>{setTimeout(res, 1000)});
       }
       var httpServer = glx.httpServer();
-      while(!https) {
+      while(!http) {
         try {
               let port = 10240+parseInt(Math.random()*10240);
               httpServer.listen(http, "0.0.0.0", function() {
                   console.info("Listening on ", httpServer.address());
                   done();
+                  console.log('listening on http '+http);
               });
         } catch(e) {
               console.error(e);
-              await new Promise(res=>{setTimeout(res, 1000)});
         }
+        await new Promise(res=>{setTimeout(res, 1000)});
       }
     }
 }

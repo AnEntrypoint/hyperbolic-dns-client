@@ -10,6 +10,7 @@ const node = new DHT({});
 require('dotenv').config()
 
 module.exports = (key, target)=>{
+    console.log({key, target});
     const app = express()
     const { createProxyMiddleware } = require('http-proxy-middleware');
     const proxy = createProxyMiddleware({target, changeOrigin: true, ws: true});

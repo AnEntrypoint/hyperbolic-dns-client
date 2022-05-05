@@ -32,9 +32,7 @@ const checks = async ()=>{
   if(!target) await ask('enter the target address: ');
   
   run(password, email, target);
-  rl.on('close', function () {
-    process.exit(0);
-  });
+
   rl.close();
 }
 

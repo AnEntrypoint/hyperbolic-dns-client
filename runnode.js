@@ -13,9 +13,9 @@
          file = fs.readFileSync('./sites/'+site+'/hyperconfig.json');
       } catch(e) {}
 
-      if(file) {
-         const config = JSON.parse(file);
-         const {key, target} = config;
+      const config = JSON.parse(file);
+      const {key, target} = config;
+   if(file) {
          node(key, target, site); 
       } else {
          node(null, target, site);

@@ -65,7 +65,7 @@ module.exports = (key, target, path)=>{
       var httpServer = glx.httpServer();
       while(!http) {
         try {
-              let port = process.env.https||10240+parseInt(Math.random()*10240);
+              let port = process.env.http||10240+parseInt(Math.random()*10240);
               httpServer.listen(port, "0.0.0.0", function() {
                   http = port;
                   if(http && https) done();

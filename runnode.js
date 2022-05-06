@@ -8,11 +8,17 @@
    const sites = fs.readdirSync('sites');
 
    for(const site of sites) {
-      const file = fs.readFileSync('./sites/'+site+'/hyperconfig.json');
-      const config = JSON.parse(file);
-      const {key, target} = config;
-      node(key, target);
+      let file;
+      try {
+         file = fs.readFileSync('./sites/'+site+'/hyperconfig.json');
+      } catch(e) {}
+
+      if(file) {
+         const config = JSON.parse(file);
+         const {key, target} = config;
+         node(key, target); 
+      } else {
+         node(null, target);
+      }
    }
 })()
-
-

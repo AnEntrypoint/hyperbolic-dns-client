@@ -16,7 +16,7 @@
       if(file) {
          const config = JSON.parse(file);
          const {key, target} = config;
-         node(key, target); 
+         node(key, target, site); 
       } else {
          node(null, target, site);
       }

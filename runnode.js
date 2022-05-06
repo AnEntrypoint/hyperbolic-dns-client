@@ -18,7 +18,9 @@
          const {key, target} = config;
          node(key, target); 
       } else {
-         node(null, target);
+         node(null, target, site);
       }
    }
 })()
+
+

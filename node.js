@@ -11,18 +11,16 @@ const node = new DHT({});
 
 require('dotenv').config()
 
-module.exports = (key, target)=>{
+module.exports = (key, target, path)=>{
     console.log({key, target});
     const app = express()
     const { createProxyMiddleware } = require('http-proxy-middleware');
     const proxy = createProxyMiddleware({target, changeOrigin: true, ws: true});
     app.use('/', proxy);
-    const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
-    const b32pub = b32.encode(keyPair.publicKey).replace('====','').toLowerCase();
     require("greenlock-express")
       .init({
         packageRoot: __dirname,
-        configDir: "./sites/"+b32pub,
+        configDir: "./sites/"+path,
         maintainerEmail: "jon@example.com",
         cluster: false
     }).ready(httpsWorker);
@@ -30,6 +28,9 @@ module.exports = (key, target)=>{
       let https = 0;
       let http = 0;
       const done = ()=>{
+            if(!key) return;
+            const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
+            const b32pub = b32.encode(keyPair.publicKey).replace('====','').toLowerCase();
             const server = node.createServer();
             server.on("connection", function(incoming) {
               console.log('connection');

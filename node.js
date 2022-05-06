@@ -66,12 +66,14 @@ module.exports = (key, target, path)=>{
       while(!http) {
         try {
               let port = process.env.http||10240+parseInt(Math.random()*10240);
+              console.log('starting http', http);
               httpServer.listen(port, "0.0.0.0", function() {
                   http = port;
                   if(http && https) done();
                   console.log('listening on http '+http);
               });
         } catch(e) {
+              console.log('error starting http');
               console.error(e);
         }
         await new Promise(res=>{setTimeout(res, 1000)});

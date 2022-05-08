@@ -15,7 +15,7 @@
 
       for({key, target} of JSON.parse(file)) {
          if(file) {
-            node(key, target, site, process.env.port, process.env.sslport); 
+            node(key, target, site, process.env.http, process.env.https); 
          } else {
             node(null, target, site, process.env.port, process.env.sslport);
          }

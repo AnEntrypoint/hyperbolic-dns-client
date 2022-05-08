@@ -13,12 +13,12 @@
          file = fs.readFileSync('./sites/'+site+'/hyperconfig.json');
       } catch(e) {}
 
-      const config = JSON.parse(file);
-      const {key, target} = config;
-      if(file) {
-         node(key, target, site, process.env.port, process.env.sslport); 
-      } else {
-         node(null, target, site, process.env.port, process.env.sslport);
+      for({key, target} of JSON.parse(file)) {
+         if(file) {
+            node(key, target, site, process.env.port, process.env.sslport); 
+         } else {
+            node(null, target, site, process.env.port, process.env.sslport);
+         }
       }
    }
 })()

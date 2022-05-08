@@ -55,11 +55,14 @@ module.exports = (key, target, path, preferredport, preferredsslport)=>{
       while(!https) {
         try {
               console.log('starting https', http);
-              httpsServer.listen(sslport, "0.0.0.0", function() {
-                  https = port;
-                  if(http && https) done();
-                  console.log('listening on https '+https);
-              });
+              await (new Promise((res)=>{
+                  httpsServer.listen(sslport, "0.0.0.0", function() {
+                      https = port;
+                      if(http && https) done();
+                      console.log('listening on https '+https);
+                      res();
+                  });
+              }))
         } catch(e) {
             sslport = 10240+parseInt(Math.random()*10240);
             console.error(e);
@@ -70,11 +73,15 @@ module.exports = (key, target, path, preferredport, preferredsslport)=>{
       while(!http) {
         try {
           console.log('starting http', http);
-          httpServer.listen(port, "0.0.0.0", function() {
-              http = port;
-              if(http && https) done();
-              console.log('listening on http '+http);
-          });
+          await (new Promise((res)=>{
+              httpServer.listen(port, "0.0.0.0", function() {
+                  https = port;
+                  if(http && https) done();
+                  console.log('listening on https '+https);
+                  res();
+              });
+          }))
+
         } catch(e) {
             port = 10240+parseInt(Math.random()*10240);
             console.error(e);

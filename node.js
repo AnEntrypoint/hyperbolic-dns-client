@@ -11,7 +11,9 @@ const node = new DHT({});
 
 require('dotenv').config()
 
-module.exports = (key, target, path, sslport)=>{
+module.exports = (key, target, path, preferredport, preferredsslport)=>{
+    let port = referredport;
+    let sslport = preferredsslport;
     console.log({key, target});
     const app = express()
     const { createProxyMiddleware } = require('http-proxy-middleware');
@@ -50,31 +52,32 @@ module.exports = (key, target, path, sslport)=>{
       }
       var httpsServer = glx.httpsServer(null, app);
       while(!https) {
-            try {
-                  httpsServer.listen(sslport||10240+parseInt(Math.random()*10240), "0.0.0.0", function() {
-                      https = port;
-                      if(http && https) done();
-                      console.log('listening on https '+https);
-                  });
-            } catch(e) {
-                  console.error(e);
-            }
+        try {
+              httpsServer.listen(sslport, "0.0.0.0", function() {
+                  https = port;
+                  if(http && https) done();
+                  console.log('listening on https '+https);
+              });
+        } catch(e) {
             await new Promise(res=>{setTimeout(res, 1000)});
+            sslport = 10240+parseInt(Math.random()*10240);
+            console.error(e);
+        }
       }
       var httpServer = glx.httpServer();
       while(!http) {
         try {
-              console.log('starting http', http);
-              httpServer.listen(port||10240+parseInt(Math.random()*10240), "0.0.0.0", function() {
-                  http = port;
-                  if(http && https) done();
-                  console.log('listening on http '+http);
-              });
+          console.log('starting http', http);
+          httpServer.listen(port, "0.0.0.0", function() {
+              http = port;
+              if(http && https) done();
+              console.log('listening on http '+http);
+          });
         } catch(e) {
-              console.log('error starting http');
-              console.error(e);
+            await new Promise(res=>{setTimeout(res, 1000)});
+            port = 10240+parseInt(Math.random()*10240);
+            console.error(e);
         }
-        await new Promise(res=>{setTimeout(res, 1000)});
       }
     }
 }

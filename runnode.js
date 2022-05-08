@@ -16,9 +16,9 @@
       const config = JSON.parse(file);
       const {key, target, port, sslport} = config;
       if(file) {
-         node(key, target, site, port); 
+         node(key, target, site, process.env.port); 
       } else {
-         node(null, target, site, sslport);
+         node(null, target, site, process.env.sslport);
       }
    }
 })()

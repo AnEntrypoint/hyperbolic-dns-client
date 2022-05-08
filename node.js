@@ -14,7 +14,8 @@ require('dotenv').config()
 module.exports = (key, target, path, preferredport, preferredsslport)=>{
     let port = preferredport;
     let sslport = preferredsslport;
-    console.log({key, target});
+    
+    console.log('node config', {key, target, port, sslport});
     const app = express()
     const { createProxyMiddleware } = require('http-proxy-middleware');
     const proxy = createProxyMiddleware({target, changeOrigin: true, ws: true});
@@ -53,16 +54,17 @@ module.exports = (key, target, path, preferredport, preferredsslport)=>{
       var httpsServer = glx.httpsServer(null, app);
       while(!https) {
         try {
+              console.log('starting https', http);
               httpsServer.listen(sslport, "0.0.0.0", function() {
                   https = port;
                   if(http && https) done();
                   console.log('listening on https '+https);
               });
         } catch(e) {
-            await new Promise(res=>{setTimeout(res, 1000)});
             sslport = 10240+parseInt(Math.random()*10240);
             console.error(e);
         }
+        await new Promise(res=>{setTimeout(res, 1000)});
       }
       var httpServer = glx.httpServer();
       while(!http) {
@@ -74,10 +76,10 @@ module.exports = (key, target, path, preferredport, preferredsslport)=>{
               console.log('listening on http '+http);
           });
         } catch(e) {
-            await new Promise(res=>{setTimeout(res, 1000)});
             port = 10240+parseInt(Math.random()*10240);
             console.error(e);
         }
+        await new Promise(res=>{setTimeout(res, 1000)});
       }
     }
 }

@@ -12,7 +12,7 @@ const node = new DHT({});
 require('dotenv').config()
 
 module.exports = (key, target, path, preferredport, preferredsslport)=>{
-    let port = referredport;
+    let port = preferredport;
     let sslport = preferredsslport;
     console.log({key, target});
     const app = express()

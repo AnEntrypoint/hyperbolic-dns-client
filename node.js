@@ -11,7 +11,7 @@ const node = new DHT({});
 
 require('dotenv').config()
 
-module.exports = (key, target, path, preferredport, preferredsslport)=>{
+module.exports = (key, target, preferredport, preferredsslport)=>{
     let port = preferredport;
     let sslport = preferredsslport;
     
@@ -23,7 +23,7 @@ module.exports = (key, target, path, preferredport, preferredsslport)=>{
     require("greenlock-express")
       .init({
         packageRoot: __dirname,
-        configDir: "./sites/"+path,
+        configDir: "./site/",
         maintainerEmail: "jon@example.com",
         cluster: false
     }).ready(httpsWorker);

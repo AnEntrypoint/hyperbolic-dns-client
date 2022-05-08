@@ -9,7 +9,7 @@ const run = (password, email, address)=>{
   console.log('Address will be: ', bkey+".matic.ml");
   fs.mkdirSync('sites/'+bkey+'/', { recursive: true }, (err) => {console.log(err)});
   fs.writeFileSync('.env', 'KEY='+password);
-  fs.writeFileSync('sites/'+bkey+'/hyperconfig.json', JSON.stringify({key:password, target:address}));
+  fs.writeFileSync('sites/'+bkey+'/hyperconfig.json', JSON.stringify([{key:password, target:address}]));
   fs.writeFileSync('sites/'+bkey+'/config.json', JSON.stringify({sites:[{subject:bkey+".matic.ml"}], defaults:{subscriberEmail:email}}));
   fs.writeFileSync('address', bkey+".matic.ml");
 }

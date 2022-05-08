@@ -5,21 +5,14 @@
       await require('./init.js')();
       fs.closeSync(fs.openSync('run', 'w'));
    }
-   const sites = fs.readdirSync('sites');
-
-   for(const site of sites) {
-      let file;
-      try {
-         file = fs.readFileSync('./sites/'+site+'/hyperconfig.json');
-      } catch(e) {}
-
-      for({key, target, http, https} of JSON.parse(file)) {
-         if(file) {
-            node(key, target, site, http, https); 
-         } else {
-            node(null, target, site, http, https);
-         }
-      }
+   let file;
+   try {
+      file = fs.readFileSync('./site/hyperconfig.json');
+   } catch(e) {}
+   if(file) {
+      node(key, target, site, process.env.http, process.env.https); 
+   } else {
+      node(null, target, site, process.env.http, process.env.https);
    }
 })()
 

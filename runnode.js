@@ -14,11 +14,11 @@
       } catch(e) {}
 
       const config = JSON.parse(file);
-      const {key, target, port, sslport} = config;
+      const {key, target} = config;
       if(file) {
-         node(key, target, site, process.env.port); 
+         node(key, target, site, process.env.port, process.env.sslport)); 
       } else {
-         node(null, target, site, process.env.sslport);
+         node(null, target, site, process.env.port, process.env.sslport);
       }
    }
 })()

@@ -75,9 +75,9 @@ module.exports = (key, target, preferredport, preferredsslport)=>{
           console.log('starting http', http);
           await (new Promise((res)=>{
               httpServer.listen(port, "0.0.0.0", function() {
-                  https = port;
+                  http = port;
                   if(http && https) done();
-                  console.log('listening on https '+https);
+                  console.log('listening on http '+https);
                   res();
               });
           }))

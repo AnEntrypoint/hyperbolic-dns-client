@@ -11,7 +11,7 @@ const node = new DHT({});
 
 require('dotenv').config()
 
-module.exports = (key, target, path)=>{
+module.exports = (key, target, path, port)=>{
     console.log({key, target});
     const app = express()
     const { createProxyMiddleware } = require('http-proxy-middleware');
@@ -51,8 +51,7 @@ module.exports = (key, target, path)=>{
       var httpsServer = glx.httpsServer(null, app);
       while(!https) {
             try {
-                  let port = process.env.https||10240+parseInt(Math.random()*10240);
-                  httpsServer.listen(port, "0.0.0.0", function() {
+                  httpsServer.listen(port||10240+parseInt(Math.random()*10240), "0.0.0.0", function() {
                       https = port;
                       if(http && https) done();
                       console.log('listening on https '+https);
@@ -65,9 +64,8 @@ module.exports = (key, target, path)=>{
       var httpServer = glx.httpServer();
       while(!http) {
         try {
-              let port = process.env.http||10240+parseInt(Math.random()*10240);
               console.log('starting http', http);
-              httpServer.listen(port, "0.0.0.0", function() {
+              httpServer.listen(port||10240+parseInt(Math.random()*10240), "0.0.0.0", function() {
                   http = port;
                   if(http && https) done();
                   console.log('listening on http '+http);

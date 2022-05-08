@@ -10,9 +10,9 @@
       file = fs.readFileSync('./site/hyperconfig.json');
    } catch(e) {}
    if(file) {
-      node(key, target, site, process.env.http, process.env.https); 
+      node(key, process.env.target, site, process.env.http, process.env.https); 
    } else {
-      node(null, target, site, process.env.http, process.env.https);
+      node(null, process.env.target, site, process.env.http, process.env.https);
    }
 })()
 

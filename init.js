@@ -7,10 +7,10 @@ const run = (password, email, address)=>{
   const keyPair = crypto.keyPair(crypto.data(Buffer.from(password)));
   const bkey = b32.encode(keyPair.publicKey).replace('====','').toLowerCase();
   console.log('Address will be: ', bkey+".matic.ml");
-  fs.mkdirSync('sites/'+bkey+'/', { recursive: true }, (err) => {console.log(err)});
+  fs.mkdirSync('site/', { recursive: true }, (err) => {console.log(err)});
   fs.writeFileSync('.env', 'KEY='+password);
-  fs.writeFileSync('sites/'+bkey+'/hyperconfig.json', JSON.stringify([{key:password, target:address, http:80, https:443}]));
-  fs.writeFileSync('sites/'+bkey+'/config.json', JSON.stringify({sites:[{subject:bkey+".matic.ml"}], defaults:{subscriberEmail:email}}));
+  fs.writeFileSync('site/hyperconfig.json', JSON.stringify([{key:password, target:address, http:80, https:443}]));
+  fs.writeFileSync('site/config.json', JSON.stringify({sites:[{subject:bkey+".matic.ml"}], defaults:{subscriberEmail:email}}));
   fs.writeFileSync('address', bkey+".matic.ml");
 }
 

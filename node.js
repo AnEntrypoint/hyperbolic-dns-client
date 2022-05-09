@@ -10,18 +10,16 @@ const node = new DHT({});
 
 require('dotenv').config()
 
-module.exports = (key, target, preferredport, preferredsslport, router)=>{
-    let port = preferredport;
-    let sslport = preferredsslport;
-    
-    console.log('node config', {key, target, port, sslport});
+module.exports = ()=>{
+    let port = process.env.http;
+    let sslport = process.env.https;
     const app = express()
     const { createProxyMiddleware } = require('http-proxy-middleware');
-    const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
-    const b32pub = b32.encode(keyPair.publicKey).replace('====','').toLowerCase();
+    
+    const router = JSON.parse(fs.readFileSync('./site/routerconfig.json'));
     const proxy = createProxyMiddleware({
       router,
-      target,
+      process.env.target,
       changeOrigin: true,
       ws: true
     });
@@ -38,21 +36,26 @@ module.exports = (key, target, preferredport, preferredsslport, router)=>{
       let http = 0;
       const done = ()=>{
             if(!key) return;
-            const server = node.createServer();
-            server.on("connection", function(incoming) {
-              console.log('connection');
-              incoming.once("data", function(data) {
-                let outgoing;
-                if(data == 'http') {
-                  outgoing = net.connect(http, '127.0.0.1');
-                }
-                if(data == 'https') {
-                  outgoing = net.connect(https, '127.0.0.1');
-                }
-                pump(incoming, outgoing, incoming);
-              });
-            });
-            server.listen(keyPair);
+            const hyperconfig = JSON.parse(fs.readFileSync('./site/hyperconfig.json'));
+            for(let conf of hyperconfig) {
+                const key = conf.key
+                const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
+                const b32pub = b32.encode(keyPair.publicKey).replace('====','').toLowerCase();
+                const server = node.createServer();
+                server.on("connection", function(incoming) {
+\                  incoming.once("data", function(data) {
+                    let outgoing;
+                    if(data == 'http') {
+                      outgoing = net.connect(http, '127.0.0.1');
+                    }
+                    if(data == 'https') {
+                      outgoing = net.connect(https, '127.0.0.1');
+                    }
+                    pump(incoming, outgoing, incoming);
+                  });
+                });
+                server.listen(keyPair);
+            }
             console.log('listening', b32pub);
       }
       var httpsServer = glx.httpsServer(null, app);

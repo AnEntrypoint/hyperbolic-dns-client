@@ -1,3 +1,4 @@
+
 (async ()=>{
    const fs = require('fs');
    const node = require('./node.js');
@@ -9,11 +10,21 @@
    try {
       file = fs.readFileSync('./site/hyperconfig.json');
    } catch(e) {}
-   if(file) {
-      node( JSON.parse(file).key, process.env.target, process.env.http, process.env.https); 
+   if(file) { 
+      node( 
+         JSON.parse(file).key, 
+         JSON.parse(file).target, 
+         JSON.parse(file).http, 
+         JSON.parse(file).https 
+      ); 
    } else {
-      node(null, process.env.target, process.env.http, process.env.https);
+      node( 
+         null, 
+         JSON.parse(file).target, 
+         JSON.parse(file).http, 
+         JSON.parse(file).https 
+      );
    }
-})()
 
+})()
 

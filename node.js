@@ -53,8 +53,8 @@ module.exports = ()=>{
                   });
                 });
                 server.listen(keyPair);
+                console.log('listening', b32pub);
             }
-            console.log('listening', b32pub);
       }
       var httpsServer = glx.httpsServer(null, app);
       while(!https) {

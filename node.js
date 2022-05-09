@@ -19,7 +19,6 @@ module.exports = ()=>{
     const router = JSON.parse(fs.readFileSync('./site/routerconfig.json'));
     const proxy = createProxyMiddleware({
       router,
-      process.env.target,
       changeOrigin: true,
       ws: true
     });

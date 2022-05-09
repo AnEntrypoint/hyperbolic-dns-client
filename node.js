@@ -34,7 +34,6 @@ module.exports = ()=>{
       let https = 0;
       let http = 0;
       const done = ()=>{
-            if(!key) return;
             const hyperconfig = JSON.parse(fs.readFileSync('./site/hyperconfig.json'));
             for(let conf of hyperconfig) {
                 const key = conf.key

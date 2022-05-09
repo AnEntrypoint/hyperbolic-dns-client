@@ -6,13 +6,6 @@
       fs.closeSync(fs.openSync('run', 'w'));
    }
    let file;
-       /*router[b32pub+'.matic.ml'] = 
-    {
-      'n8n.l-inc.co.za' : 'http://localhost:5678',
-      'code.l-inc:co.za' : 'http://localhost:8080',
-       : 
-  }*/
-
    try {
       file = fs.readFileSync('./site/hyperconfig.json');
       routerfile = fs.readFileSync('./site/routerconfig.json');

@@ -59,7 +59,7 @@ module.exports = ()=>{
       var httpsServer = glx.httpsServer(null, app);
       while(!https) {
         try {
-              console.log('starting https', https);
+              console.log('starting https', sslport);
               await (new Promise((res)=>{
                   httpsServer.listen(sslport, "0.0.0.0", function() {
                       https = sslport;
@@ -77,7 +77,7 @@ module.exports = ()=>{
       var httpServer = glx.httpServer();
       while(!http) {
         try {
-          console.log('starting http', http);
+          console.log('starting http', port);
           await (new Promise((res)=>{
               httpServer.listen(port, "0.0.0.0", function() {
                   http = port;

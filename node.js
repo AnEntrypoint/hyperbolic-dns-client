@@ -42,7 +42,7 @@ module.exports = ()=>{
                 const b32pub = b32.encode(keyPair.publicKey).replace('====','').toLowerCase();
                 const server = node.createServer();
                 server.on("connection", function(incoming) {
-\                  incoming.once("data", function(data) {
+                  incoming.once("data", function(data) {
                     let outgoing;
                     if(data == 'http') {
                       outgoing = net.connect(http, '127.0.0.1');

@@ -18,7 +18,7 @@
     "hi-base32": "^0.5.1",
     "http-proxy": "^1.18.1",
     "http-proxy-middleware": "^2.0.4",
-    "hypercore-crypto": "^2.3.0",
+    "hypercore-crypto": "^3.2.1",
     "net": "^1.0.2",
     "pump": "^3.0.0",
     "sni": "^1.0.0"

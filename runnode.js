@@ -5,8 +5,7 @@
       await require('./init.js')();
       fs.closeSync(fs.openSync('run', 'w'));
    }
-   routerfile = fs.readFileSync('./site/routerconfig.json');
-   node(process.env.target, process.env.http, process.env.https, JSON.parse(routerfile)); 
+   node(); 
 })()
 
 

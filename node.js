@@ -12,7 +12,10 @@ require('dotenv').config()
 
 module.exports = ()=>{
     const hyperconfig = JSON.parse(fs.readFileSync('./site/hyperconfig.json'));
-	console.log(hyperconfig);
+    console.log(hyperconfig);
+	
+    if(hyperconfig.name) await node.announce(DHT.hash(Buffer.from(hyperconfig.name), keyPair));
+	
     const app = express()
     let sslport = hyperconfig.https;
     const { createProxyMiddleware } = require('http-proxy-middleware');

@@ -36,12 +36,12 @@ module.exports = () => {
     let https = 0;
     let http = 0;
     for (let conf of hyperconfig) {
-      if(conf.announce) await node.announce(DHT.hash(Buffer.from(conf.announce), keyPair));
       let port = conf.http;
       let sslport = conf.https;
       const done = () => {
         const key = conf.key
         const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
+        if(conf.announce) node.announce(DHT.hash(Buffer.from(conf.announce), keyPair));
         const b32pub = b32.encode(keyPair.publicKey).replace('====', '').toLowerCase();
         const server = node.createServer();
         server.on("connection", function (incoming) {

@@ -55,18 +55,19 @@ module.exports = ()=>{
                 });
                 server.listen(keyPair);
                 console.log('listening', b32pub);
+                console.log('listening on https '+https);
+                console.log('listening on http '+http);
             }
       }
       var httpsServer = glx.httpsServer(null, app);
       while(!https) {
         try {
-              console.log('starting https', sslport);
               while(await tcpPortUsed.check(port)) port = 10240+parseInt(Math.random()*10240);
+              console.log('starting https', sslport);
               await (new Promise((res)=>{
                   httpsServer.listen(sslport, "0.0.0.0", function() {
                       https = sslport;
                       if(http && https) done();
-                      console.log('listening on https '+https);
                       res();
                   });
               }))
@@ -79,13 +80,12 @@ module.exports = ()=>{
       var httpServer = glx.httpServer();
       while(!http) {
         try {
-          console.log('starting http', port);
           while(await tcpPortUsed.check(port)) port = 10240+parseInt(Math.random()*10240);
+          console.log('starting http', port);
           await (new Promise((res)=>{
               httpServer.listen(port, "0.0.0.0", function() {
                   http = port;
                   if(http && https) done();
-                  console.log('listening on http '+https);
                   res();
               });
           }))

@@ -61,7 +61,7 @@ module.exports = ()=>{
       while(!https) {
         try {
               console.log('starting https', sslport);
-              while(tcpPortUsed.check(port)) port = 10240+parseInt(Math.random()*10240);
+              while(await tcpPortUsed.check(port)) port = 10240+parseInt(Math.random()*10240);
               await (new Promise((res)=>{
                   httpsServer.listen(sslport, "0.0.0.0", function() {
                       https = sslport;
@@ -79,7 +79,7 @@ module.exports = ()=>{
       while(!http) {
         try {
           console.log('starting http', port);
-          while(tcpPortUsed.check(port)) port = 10240+parseInt(Math.random()*10240);
+          while(await tcpPortUsed.check(port)) port = 10240+parseInt(Math.random()*10240);
           await (new Promise((res)=>{
               httpServer.listen(port, "0.0.0.0", function() {
                   http = port;

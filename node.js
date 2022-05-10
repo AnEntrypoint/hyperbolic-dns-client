@@ -7,13 +7,13 @@ const net = require("net");
 const pump = require("pump");
 const DHT = require("@hyperswarm/dht");
 const node = new DHT({});
-var tcpPortUsed = require('tcp-port-used');
 
 require('dotenv').config()
 
 module.exports = ()=>{
-    let port = process.env.http;
-    let sslport = process.env.https;
+    const hyperconfig = JSON.parse(fs.readFileSync('./site/hyperconfig.json'));
+    let port = hyperconfig.http;
+    let sslport = hyperconfig.https;
     const app = express()
     const { createProxyMiddleware } = require('http-proxy-middleware');
     
@@ -35,7 +35,6 @@ module.exports = ()=>{
       let https = 0;
       let http = 0;
       const done = ()=>{
-            const hyperconfig = JSON.parse(fs.readFileSync('./site/hyperconfig.json'));
             for(let conf of hyperconfig) {
                 const key = conf.key
                 const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
@@ -62,7 +61,6 @@ module.exports = ()=>{
       var httpsServer = glx.httpsServer(null, app);
       while(!https) {
         try {
-              while(await tcpPortUsed.check(port)) port = 10240+parseInt(Math.random()*10240);
               console.log('starting https', sslport);
               await (new Promise((res)=>{
                   httpsServer.listen(sslport, "0.0.0.0", function() {
@@ -80,7 +78,6 @@ module.exports = ()=>{
       var httpServer = glx.httpServer();
       while(!http) {
         try {
-          while(await tcpPortUsed.check(port)) port = 10240+parseInt(Math.random()*10240);
           console.log('starting http', port);
           await (new Promise((res)=>{
               httpServer.listen(port, "0.0.0.0", function() {

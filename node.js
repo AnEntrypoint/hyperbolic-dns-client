@@ -7,6 +7,7 @@ const net = require("net");
 const pump = require("pump");
 const DHT = require("@hyperswarm/dht");
 const node = new DHT({});
+var tcpPortUsed = require('tcp-port-used');
 
 require('dotenv').config()
 
@@ -60,6 +61,7 @@ module.exports = ()=>{
       while(!https) {
         try {
               console.log('starting https', sslport);
+              while(tcpPortUsed.check(port)) port = 10240+parseInt(Math.random()*10240);
               await (new Promise((res)=>{
                   httpsServer.listen(sslport, "0.0.0.0", function() {
                       https = sslport;
@@ -69,7 +71,6 @@ module.exports = ()=>{
                   });
               }))
         } catch(e) {
-            sslport = 10240+parseInt(Math.random()*10240);
             console.error(e);
         }
         await new Promise(res=>{setTimeout(res, 1000)});
@@ -78,6 +79,7 @@ module.exports = ()=>{
       while(!http) {
         try {
           console.log('starting http', port);
+          while(tcpPortUsed.check(port)) port = 10240+parseInt(Math.random()*10240);
           await (new Promise((res)=>{
               httpServer.listen(port, "0.0.0.0", function() {
                   http = port;
@@ -86,9 +88,7 @@ module.exports = ()=>{
                   res();
               });
           }))
-
         } catch(e) {
-            port = 10240+parseInt(Math.random()*10240);
             console.error(e);
         }
         await new Promise(res=>{setTimeout(res, 1000)});

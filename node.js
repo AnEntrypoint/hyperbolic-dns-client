@@ -12,9 +12,9 @@ require('dotenv').config()
 
 module.exports = ()=>{
     const hyperconfig = JSON.parse(fs.readFileSync('./site/hyperconfig.json'));
-    let port = hyperconfig.http;
-    let sslport = hyperconfig.https;
+	console.log(hyperconfig);
     const app = express()
+    let sslport = hyperconfig.https;
     const { createProxyMiddleware } = require('http-proxy-middleware');
     
     const router = JSON.parse(fs.readFileSync('./site/routerconfig.json'));
@@ -34,8 +34,10 @@ module.exports = ()=>{
     async function httpsWorker(glx) {
       let https = 0;
       let http = 0;
+      for(let conf of hyperconfig) {
+	let port = conf.http;
+	      let sslport = conf.https;
       const done = ()=>{
-            for(let conf of hyperconfig) {
                 const key = conf.key
                 const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
                 const b32pub = b32.encode(keyPair.publicKey).replace('====','').toLowerCase();
@@ -56,11 +58,11 @@ module.exports = ()=>{
                 console.log('listening', b32pub);
                 console.log('listening on https '+https);
                 console.log('listening on http '+http);
-            }
       }
-      var httpsServer = glx.httpsServer(null, app);
+      var httpsServer;
       while(!https) {
         try {
+              httpsServer = glx.httpsServer(null, app);
               console.log('starting https', sslport);
               await (new Promise((res)=>{
                   httpsServer.listen(sslport, "0.0.0.0", function() {
@@ -70,14 +72,15 @@ module.exports = ()=>{
                   });
               }))
         } catch(e) {
-          port = 10240+parseInt(Math.random()*10240);
+          sslport = 10240+parseInt(Math.random()*10240);
           console.error(e);
         }
         await new Promise(res=>{setTimeout(res, 1000)});
       }
-      var httpServer = glx.httpServer();
+      var httpServer;
       while(!http) {
         try {
+          httpServer = glx.httpServer();
           console.log('starting http', port);
           await (new Promise((res)=>{
               httpServer.listen(port, "0.0.0.0", function() {
@@ -92,5 +95,7 @@ module.exports = ()=>{
         }
         await new Promise(res=>{setTimeout(res, 1000)});
       }
+      }
     }
 }
+

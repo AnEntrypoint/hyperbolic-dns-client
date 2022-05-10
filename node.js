@@ -41,7 +41,12 @@ module.exports = () => {
       const done = () => {
         const key = conf.key
         const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
-        if(conf.announce) node.announce(DHT.hash(Buffer.from(conf.announce), keyPair));
+        console.log(conf);
+        if(conf.announce) {
+          const target = DHT.hash(Buffer.from(conf.announce))
+          console.log("Announcing:", conf.announce)
+          node.announce(target, keyPair);
+        }
         const b32pub = b32.encode(keyPair.publicKey).replace('====', '').toLowerCase();
         const server = node.createServer();
         server.on("connection", function (incoming) {

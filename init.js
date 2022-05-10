@@ -9,7 +9,7 @@ const run = (password, email, address)=>{
   console.log('Address will be: ', bkey+".matic.ml");
   fs.mkdirSync('site/', { recursive: true }, (err) => {console.log(err)});
   fs.writeFileSync('.env', 'KEY='+password);
-  fs.writeFileSync('site/hyperconfig.json', JSON.stringify([{key:password, target:address, http:80, https:443}]));
+  fs.writeFileSync('site/hyperconfig.json', JSON.stringify([{key:password, announce: domainname, target:address, http:80, https:443}]));
   fs.writeFileSync('site/config.json', JSON.stringify({sites:[{subject:bkey+".matic.ml"}], defaults:{subscriberEmail:email}}));
   const router = {};
   router[bkey+".matic.ml"] = "http://localhost:8080";

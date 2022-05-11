@@ -14,7 +14,7 @@ module.exports = () => {
   const hyperconfig = JSON.parse(fs.readFileSync('./site/hyperconfig.json'));
   console.log(hyperconfig);
 
-  
+
   const app = express()
   const { createProxyMiddleware } = require('http-proxy-middleware');
 
@@ -33,27 +33,27 @@ module.exports = () => {
       cluster: false
     }).ready(httpsWorker);
   async function httpsWorker(glx) {
-    for (let conf of hyperconfig) {
-      let https = 0;
-      let http = 0;
-      let port = conf.http;
-      let sslport = conf.https;
-      const done = async () => {
+    let https = 0;
+    let http = 0;
+    let port = process.env.http;
+    let sslport = process.env.https;
+    const done = async () => {
+      for (let conf of hyperconfig) {
         const key = conf.key
         const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
         console.log(conf);
-        if(conf.announce) {
+        if (conf.announce) {
           console.log("Announced:", conf.announce)
-          const base = 1000*60*10;
-          const random = parseInt(base*Math.random())
-          const run = async ()=>{
+          const base = 1000 * 60 * 10;
+          const random = parseInt(base * Math.random())
+          const run = async () => {
             try {
               const hash = DHT.hash(Buffer.from(conf.announce))
               const keyPair = crypto.keyPair(crypto.data(Buffer.from(conf.key)));
               await node.announce(hash, keyPair).finished();
-	            console.log("Announced:", conf.announce, new Date(), hash);
-            }catch(e) {}
-            setTimeout(run, base+random);
+              console.log("Announced:", conf.announce, new Date(), hash);
+            } catch (e) { }
+            setTimeout(run, base + random);
           }
           await run();
         }
@@ -76,42 +76,38 @@ module.exports = () => {
         console.log('listening on https ' + https);
         console.log('listening on http ' + http);
       }
-      let httpsServer;
-      while (!https) {
-        try {
-          httpsServer = glx.httpsServer(null, app);
-          console.log('starting https', sslport);
-          await (new Promise((res) => {
-            httpsServer.listen(sslport, "0.0.0.0", function () {
-              https = sslport;
-              if (http && https) done();
-              res();
-            });
-          }))
-        } catch (e) {
-          sslport = 10240 + parseInt(Math.random() * 10240);
-          console.error(e);
-        }
-        await new Promise(res => { setTimeout(res, 1000) });
+    }
+    while (!https) {
+      try {
+        console.log('starting https', sslport);
+        await (new Promise((res) => {
+          glx.httpsServer(null, app).listen(sslport, "0.0.0.0", function () {
+            https = sslport;
+            if (http && https) done();
+            res();
+          });
+        }))
+      } catch (e) {
+        sslport = 10240 + parseInt(Math.random() * 10240);
+        console.error(e);
       }
-      let httpServer;
-      while (!http) {
-        try {
-          httpServer = glx.httpServer();
-          console.log('starting http', port);
-          await (new Promise((res) => {
-            httpServer.listen(port, "0.0.0.0", function () {
-              http = port;
-              if (http && https) done();
-              res();
-            });
-          }))
-        } catch (e) {
-          port = 10240 + parseInt(Math.random() * 10240);
-          console.error(e);
-        }
-        await new Promise(res => { setTimeout(res, 1000) });
+      await new Promise(res => { setTimeout(res, 1000) });
+    }
+    while (!http) {
+      try {
+        console.log('starting http', port);
+        await (new Promise((res) => {
+          glx.httpServer().listen(port, "0.0.0.0", function () {
+            http = port;
+            if (http && https) done();
+            res();
+          });
+        }))
+      } catch (e) {
+        port = 10240 + parseInt(Math.random() * 10240);
+        console.error(e);
       }
+      await new Promise(res => { setTimeout(res, 1000) });
     }
   }
 }

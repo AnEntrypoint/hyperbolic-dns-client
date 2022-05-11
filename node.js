@@ -43,10 +43,19 @@ module.exports = () => {
         const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
         console.log(conf);
         if(conf.announce) {
-          const hash = DHT.hash(Buffer.from(conf.announce))
-          console.log("Announcing:", conf.announce)
-          await node.announce(hash, keyPair).finished();
-          setInterval(()=>{node.announce(hash, keyPair)}, 1000*60*5+(parseInt(Math.random()*(1000*60*3))));
+          console.log("Announced:", conf.announce)
+          const base = 1000*60*10;
+          const random = parseInt(base*Math.random())
+          const run = async ()=>{
+            try {
+              const hash = DHT.hash(Buffer.from(conf.announce))
+              const keyPair = crypto.keyPair(crypto.data(Buffer.from(conf.key)));
+              await node.announce(hash, keyPair).finished();
+	            console.log("Announced:", conf.announce, new Date(), hash);
+            }catch(e) {}
+            setTimeout(run, base+random);
+          }
+          run();
         }
         const b32pub = b32.encode(keyPair.publicKey).replace('====', '').toLowerCase();
         const server = node.createServer();

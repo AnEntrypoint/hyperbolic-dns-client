@@ -10,9 +10,10 @@ const run = (password, email, address)=>{
   fs.mkdirSync('site/', { recursive: true }, (err) => {console.log(err)});
   fs.writeFileSync('.env', 'KEY='+password);
   fs.writeFileSync('site/hyperconfig.json', JSON.stringify([{key:password, announce: process.env.domainname, target:address, http:80, https:443}]));
-  fs.writeFileSync('site/config.json', JSON.stringify({sites:[{subject:bkey+".matic.ml"}], defaults:{subscriberEmail:email}}));
+  fs.writeFileSync('site/config.json', JSON.stringify({sites:[{subject:bkey+".matic.ml"},{subject:process.env.domainname+".matic.ml"}], defaults:{subscriberEmail:email}}));
   const router = {};
   router[bkey+".matic.ml"] = "http://localhost:8080";
+  router[process.env.domainname+".matic.ml"] = "http://localhost:8080";
   fs.writeFileSync('site/routerconfig.json', JSON.stringify(router));
   fs.writeFileSync('address', bkey+".matic.ml");
 }

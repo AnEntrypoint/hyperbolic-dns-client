@@ -33,9 +33,9 @@ module.exports = () => {
       cluster: false
     }).ready(httpsWorker);
   async function httpsWorker(glx) {
-    let https = 0;
-    let http = 0;
     for (let conf of hyperconfig) {
+      let https = 0;
+      let http = 0;
       let port = conf.http;
       let sslport = conf.https;
       const done = async () => {
@@ -55,7 +55,7 @@ module.exports = () => {
             }catch(e) {}
             setTimeout(run, base+random);
           }
-          run();
+          await run();
         }
         const b32pub = b32.encode(keyPair.publicKey).replace('====', '').toLowerCase();
         const server = node.createServer();
@@ -76,7 +76,7 @@ module.exports = () => {
         console.log('listening on https ' + https);
         console.log('listening on http ' + http);
       }
-      var httpsServer;
+      let httpsServer;
       while (!https) {
         try {
           httpsServer = glx.httpsServer(null, app);
@@ -94,7 +94,7 @@ module.exports = () => {
         }
         await new Promise(res => { setTimeout(res, 1000) });
       }
-      var httpServer;
+      let httpServer;
       while (!http) {
         try {
           httpServer = glx.httpServer();

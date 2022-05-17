@@ -6,16 +6,16 @@ const crypto = require("hypercore-crypto");
 const run = (password, email, address)=>{
   const keyPair = crypto.keyPair(crypto.data(Buffer.from(password)));
   const bkey = b32.encode(keyPair.publicKey).replace('====','').toLowerCase();
-  console.log('Address will be: ', bkey+".matic.ml");
+  console.log('Address will be: ', bkey+".sites.247420.xyz");
   fs.mkdirSync('site/', { recursive: true }, (err) => {console.log(err)});
   fs.writeFileSync('.env', 'KEY='+password);
   fs.writeFileSync('site/hyperconfig.json', JSON.stringify([{key:password, announce: process.env.domainname, target:address, http:80, https:443}]));
-  fs.writeFileSync('site/config.json', JSON.stringify({sites:[{subject:bkey+".matic.ml"},{subject:process.env.domainname+".matic.ml"}], defaults:{subscriberEmail:email}}));
+  fs.writeFileSync('site/config.json', JSON.stringify({sites:[{subject:bkey+".sites.247420.xyz"},{subject:process.env.domainname+".sites.247420.xyz"}], defaults:{subscriberEmail:email}}));
   const router = {};
-  router[bkey+".matic.ml"] = "http://localhost:8080";
-  router[process.env.domainname+".matic.ml"] = "http://localhost:8080";
+  router[bkey+".sites.247420.xyz"] = "http://localhost:8080";
+  router[process.env.domainname+".sites.247420.xyz"] = "http://localhost:8080";
   fs.writeFileSync('site/routerconfig.json', JSON.stringify(router));
-  fs.writeFileSync('address', bkey+".matic.ml");
+  fs.writeFileSync('address', bkey+".sites.247420.xyz");
 }
 
 

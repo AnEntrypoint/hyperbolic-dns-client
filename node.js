@@ -35,8 +35,8 @@ module.exports = () => {
   async function httpsWorker(glx) {
     let https = 0;
     let http = 0;
-    let port = hyperconfig[0].http;
-    let sslport = hyperconfig[0].https;
+    let port = hyperconfig[0].http|80;
+    let sslport = hyperconfig[0].https|443;
     const done = async () => {
       for (let conf of hyperconfig) {
         const key = conf.key

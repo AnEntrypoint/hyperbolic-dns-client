@@ -22,6 +22,10 @@ module.exports = () => {
   const proxy = createProxyMiddleware({
     router,
     changeOrigin: true,
+    onProxyReq: (proxyReq, req, res)=>{
+      proxyReq.setHeader('X-Forwarded-Host', req.hostname);
+      proxyReq.setHeader('X-Forwarded-Proto', 'https');
+    },
     ws: true
   });
   app.use('/', proxy);

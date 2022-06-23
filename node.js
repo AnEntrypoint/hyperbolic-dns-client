@@ -68,14 +68,16 @@ module.exports = () => {
             let outgoing;
             if (data == 'dns') {
               incoming.write(JSON.stringify(node.remoteAddress()));
+              incoming.close();
+            } else {
+              if (data == 'http') {
+                outgoing = net.connect(http, '127.0.0.1');
+              }
+              if (data == 'https') {
+                outgoing = net.connect(https, '127.0.0.1');
+              }
+              pump(incoming, outgoing, incoming);
             }
-            if (data == 'http') {
-              outgoing = net.connect(http, '127.0.0.1');
-            }
-            if (data == 'https') {
-              outgoing = net.connect(https, '127.0.0.1');
-            }
-            pump(incoming, outgoing, incoming);
           });
         });
         server.listen(keyPair);

@@ -68,7 +68,7 @@ module.exports = () => {
             let outgoing;
             if (data == 'dns') {
               incoming.write(JSON.stringify(node.remoteAddress()));
-              incoming.close();
+              incoming.end();
             } else {
               if (data == 'http') {
                 outgoing = net.connect(http, '127.0.0.1');

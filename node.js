@@ -39,23 +39,23 @@ module.exports = () => {
   async function httpsWorker(glx) {
     let https = 0;
     let http = 0;
-    let port = hyperconfig[0].http|80;
-    let sslport = hyperconfig[0].https|443;
+    let port = 80;
+    let sslport = 443;
     const done = async () => {
       for (let conf of hyperconfig) {
-        const key = conf.key||crypto.randomBytes(size);
+        const key = crypto.randomBytes(size);
         const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
         console.log(conf);
-        if (conf.announce) {
-          console.log("Announced:", conf.announce)
+        if (conf) {
+          console.log("Announced:", conf)
           const base = 1000 * 60 * 10;
           const random = parseInt(base * Math.random())
           const run = async () => {
             try {
-              const hash = DHT.hash(Buffer.from(conf.announce))
+              const hash = DHT.hash(Buffer.from(conf))
               const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
               await node.announce('hyperbolic'+hash, keyPair).finished();
-              console.log("Announced:", conf.announce, new Date(), hash);
+              console.log("Announced:", conf, new Date(), hash);
             } catch (e) { }
             setTimeout(run, base + random);
           }

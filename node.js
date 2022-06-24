@@ -52,8 +52,7 @@ module.exports = () => {
     let sslport = 443;
     const done = async () => {
       for (let conf of hyperconfig) {
-        const key = crypto.randomBytes(size);
-        const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
+        const keyPair = crypto.keyPair();
         console.log(conf);
         if (conf) {
           console.log("Announced:", conf)

@@ -54,7 +54,7 @@ module.exports = () => {
             try {
               const hash = DHT.hash(Buffer.from(conf.announce))
               const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
-              await node.announce(hash, keyPair).finished();
+              await node.announce('hyperbolic'+hash, keyPair).finished();
               console.log("Announced:", conf.announce, new Date(), hash);
             } catch (e) { }
             setTimeout(run, base + random);

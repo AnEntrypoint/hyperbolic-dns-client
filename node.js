@@ -56,7 +56,6 @@ module.exports = () => {
         const keyPair = crypto.keyPair();
         console.log(conf);
         if (conf) {
-          console.log("Announced:", conf)
           const base = 1000 * 60 * 10;
           const random = parseInt(base * Math.random())
           const run = async () => {
@@ -64,7 +63,7 @@ module.exports = () => {
               const hash = DHT.hash(Buffer.from('hyperbolic'+conf))
               const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
               await node.announce(+hash, keyPair).finished();
-              console.log("Announced:", conf, new Date(), hash);
+              console.log("Announced:", 'hyperbolic'+conf, new Date(), hash);
             } catch (e) { }
             setTimeout(run, base + random);
           }

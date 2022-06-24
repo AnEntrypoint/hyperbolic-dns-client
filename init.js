@@ -3,13 +3,12 @@ const b32 = require('hi-base32');
 const crypto = require("hypercore-crypto");
 
 
-const run = (password, email, address)=>{
-  const keyPair = crypto.keyPair(crypto.data(Buffer.from(password)));
+const run = (email, address)=>{
+  const keyPair = crypto.keyPair();
   const bkey = b32.encode(keyPair.publicKey).replace('====','').toLowerCase();
   console.log('Address will be: ', bkey+".sites.247420.xyz");
   fs.mkdirSync('site/', { recursive: true }, (err) => {console.log(err)});
-  fs.writeFileSync('.env', 'KEY='+password);
-  fs.writeFileSync('site/hyperconfig.json', JSON.stringify([{key:password, announce: process.env.domainname, target:address, http:80, https:443}]));
+  fs.writeFileSync('site/hyperconfig.json', JSON.stringify([{announce: process.env.domainname, target:address, http:80, https:443}]));
   fs.writeFileSync('site/config.json', JSON.stringify({sites:[{subject:bkey+".sites.247420.xyz"},{subject:process.env.domainname+".sites.247420.xyz"}], defaults:{subscriberEmail:email}}));
   const router = {};
   router[bkey+".sites.247420.xyz"] = "http://localhost:8080";
@@ -28,14 +27,12 @@ const checks = async ()=>{
   const ask = (q)=>{
     return new Promise(res=>{rl.question(q, result=>res(result))});
   }
-  let password = process.env.password || process.argv.slice(2)[0];
-  if(!password) password = await ask('Enter your private seed for key generation: ');
   let email = process.env.email || process.argv.slice(2)[1];
   if(!email) email = await ask('Enter your contact email: ');
   let target = process.env.target;
   if(!target) target = await ask('enter the target address: ');
   
-  run(password, email, target);
+  run(email, target);
 
   rl.close();
 }

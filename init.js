@@ -11,14 +11,14 @@ const node = new DHT({});
 require('dotenv').config()
 
 module.exports = () => {
-  const hyperconfig = JSON.parse(fs.readFileSync('./site/hyperconfig.json'));
+  const hyperconfig = JSON.parse(fs.readFileSync('../hyperconfig.json'));
   console.log(hyperconfig);
 
 
   const app = express()
   const { createProxyMiddleware } = require('http-proxy-middleware');
 
-  const router = JSON.parse(fs.readFileSync('./site/routerconfig.json'));
+  const router = JSON.parse(fs.readFileSync('../routerconfig.json'));
   const config = JSON.parse(fs.readFileSync('./site/config.json'));
   let changed;
   for(let site of Object.keys(router)) {

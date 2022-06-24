@@ -9,7 +9,7 @@ const run = (email, address)=>{
   console.log('Address will be: ', bkey+".sites.247420.xyz");
   fs.mkdirSync('site/', { recursive: true }, (err) => {console.log(err)});
   fs.writeFileSync('../hyperconfig.json', JSON.stringify([process.env.domainname]));
-  fs.writeFileSync('site/config.json', JSON.stringify({sites:[{subject:bkey+".sites.247420.xyz"},{subject:process.env.domainname+".sites.247420.xyz"}], defaults:{subscriberEmail:email}}));
+  fs.writeFileSync('site/config.json', JSON.stringify({sites:[{}], defaults:{subscriberEmail:email}}));
   const router = {};
   router[bkey+".sites.247420.xyz"] = "http://localhost:8080";
   router[process.env.domainname+".sites.247420.xyz"] = "http://localhost:8080";

@@ -19,6 +19,15 @@ module.exports = () => {
   const { createProxyMiddleware } = require('http-proxy-middleware');
 
   const router = JSON.parse(fs.readFileSync('./site/routerconfig.json'));
+  const config = JSON.parse(fs.readFileSync('./site/config.json'));
+  let changed;
+  for(let site of Object.keys(router)) {
+    if(!config.sites.filter(a=>a.subject===site).length) {
+      config.sites.push({subject:site});
+      changed = true;
+    }
+  }
+  if(changed) fs.writeFileSync('./site/config.json', JSON.stringify(config));
   const proxy = createProxyMiddleware({
     router,
     changeOrigin: true,

@@ -52,6 +52,7 @@ module.exports = () => {
     let port = 80;
     let sslport = 443;
     const done = async () => {
+      await node.ready();
       for (let conf of hyperconfig) {
         const keyPair = crypto.keyPair();
         console.log(conf);
@@ -61,10 +62,12 @@ module.exports = () => {
           const run = async () => {
             try {
               const hash = DHT.hash(Buffer.from('hyperbolic'+conf))
-              const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
-              await node.announce(+hash, keyPair).finished();
+              console.log("Announcing:", 'hyperbolic'+conf, new Date(), hash);
+              await node.announce(hash, keyPair).finished();
               console.log("Announced:", 'hyperbolic'+conf, new Date(), hash);
-            } catch (e) { }
+            } catch (e) { 
+              console.log(e);
+            }
             setTimeout(run, base + random);
           }
           await run();

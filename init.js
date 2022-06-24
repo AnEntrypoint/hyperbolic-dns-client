@@ -1,40 +1,132 @@
+"use strict";
 const fs = require('fs');
 const b32 = require('hi-base32');
 const crypto = require("hypercore-crypto");
+const express = require("express");
+const net = require("net");
+const pump = require("pump");
+const DHT = require("@hyperswarm/dht");
+const node = new DHT({});
+
+require('dotenv').config()
+
+module.exports = () => {
+  const hyperconfig = JSON.parse(fs.readFileSync('./site/hyperconfig.json'));
+  console.log(hyperconfig);
 
 
-const run = (email, address)=>{
-  const keyPair = crypto.keyPair();
-  const bkey = b32.encode(keyPair.publicKey).replace('====','').toLowerCase();
-  console.log('Address will be: ', bkey+".sites.247420.xyz");
-  fs.mkdirSync('site/', { recursive: true }, (err) => {console.log(err)});
-  fs.writeFileSync('../hyperconfig.json', JSON.stringify([process.env.domainname]));
-  fs.writeFileSync('site/config.json', JSON.stringify({sites:[{subject:bkey+".sites.247420.xyz"},{subject:process.env.domainname+".sites.247420.xyz"}], defaults:{subscriberEmail:email}}));
-  const router = {};
-  router[bkey+".sites.247420.xyz"] = "http://localhost:8080";
-  router[process.env.domainname+".sites.247420.xyz"] = "http://localhost:8080";
-  fs.writeFileSync('../routerconfig.json', JSON.stringify(router));
-  fs.writeFileSync('address', bkey+".sites.247420.xyz");
-}
+  const app = express()
+  const { createProxyMiddleware } = require('http-proxy-middleware');
 
-
-const checks = async ()=>{
-  const readline = require('readline');
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-  const ask = (q)=>{
-    return new Promise(res=>{rl.question(q, result=>res(result))});
+  const router = JSON.parse(fs.readFileSync('./site/routerconfig.json'));
+  const config = JSON.parse(fs.readFileSync('./site/config.json'));
+  let changed;
+  for(let site of Object.keys(router)) {
+    if(!config.sites.filter(a=>a.subject===site).length) {
+      config.sites.push({subject:site});
+      changed = true;
+    }
   }
-  let email = process.env.email || process.argv.slice(2)[1];
-  if(!email) email = await ask('Enter your contact email: ');
-  let target = process.env.target;
-  if(!target) target = await ask('enter the target address: ');
-  
-  run(email, target);
-
-  rl.close();
+  if(changed) fs.writeFileSync('./site/config.json', JSON.stringify(config));
+  const proxy = createProxyMiddleware({
+    router,
+    changeOrigin: true,
+    onProxyReq: (proxyReq, req, res)=>{
+      proxyReq.setHeader('X-Forwarded-Host', req.hostname);
+      proxyReq.setHeader('X-Forwarded-Proto', 'https');
+    },
+    ws: true
+  });
+  app.use('/', proxy);
+  require("greenlock-express")
+    .init({
+      packageRoot: __dirname,
+      configDir: "./site/",
+      maintainerEmail: "jon@example.com",
+      cluster: false
+    }).ready(httpsWorker);
+  async function httpsWorker(glx) {
+    let https = 0;
+    let http = 0;
+    let port = 80;
+    let sslport = 443;
+    const done = async () => {
+      for (let conf of hyperconfig) {
+        const key = crypto.randomBytes(size);
+        const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
+        console.log(conf);
+        if (conf) {
+          console.log("Announced:", conf)
+          const base = 1000 * 60 * 10;
+          const random = parseInt(base * Math.random())
+          const run = async () => {
+            try {
+              const hash = DHT.hash(Buffer.from(conf))
+              const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
+              await node.announce('hyperbolic'+hash, keyPair).finished();
+              console.log("Announced:", conf, new Date(), hash);
+            } catch (e) { }
+            setTimeout(run, base + random);
+          }
+          await run();
+        }
+        const b32pub = b32.encode(keyPair.publicKey).replace('====', '').toLowerCase();
+        const server = node.createServer();
+        server.on("connection", function (incoming) {
+          incoming.once("data", function (data) {
+            let outgoing;
+            if (data == 'dns') {
+              incoming.write(JSON.stringify(node.remoteAddress()));
+              incoming.end();
+            } else {
+              if (data == 'http') {
+                outgoing = net.connect(http, '127.0.0.1');
+              }
+              if (data == 'https') {
+                outgoing = net.connect(https, '127.0.0.1');
+              }
+              pump(incoming, outgoing, incoming);
+            }
+          });
+        });
+        server.listen(keyPair);
+        console.log('listening', b32pub);
+        console.log('listening on https ' + https);
+        console.log('listening on http ' + http);
+      }
+    }
+    while (!https) {
+      try {
+        console.log('starting https', sslport);
+        await (new Promise((res) => {
+          glx.httpsServer(null, app).listen(sslport, "0.0.0.0", function () {
+            https = sslport;
+            if (http && https) done();
+            res();
+          });
+        }))
+      } catch (e) {
+        sslport = 10240 + parseInt(Math.random() * 10240);
+        console.error(e);
+      }
+      await new Promise(res => { setTimeout(res, 1000) });
+    }
+    while (!http) {
+      try {
+        console.log('starting http', port);
+        await (new Promise((res) => {
+          glx.httpServer().listen(port, "0.0.0.0", function () {
+            http = port;
+            if (http && https) done();
+            res();
+          });
+        }))
+      } catch (e) {
+        port = 10240 + parseInt(Math.random() * 10240);
+        console.error(e);
+      }
+      await new Promise(res => { setTimeout(res, 1000) });
+    }
+  }
 }
 
-module.exports = checks;

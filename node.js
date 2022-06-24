@@ -22,6 +22,7 @@ module.exports = () => {
   const config = JSON.parse(fs.readFileSync('./site/config.json'));
   let changed;
   for(let site of Object.keys(router)) {
+    console.log(site, config.sites, config.sites.filter(a=>a.subject===site).length);
     if(!config.sites.filter(a=>a.subject===site).length) {
       config.sites.push({subject:site});
       changed = true;
@@ -60,9 +61,9 @@ module.exports = () => {
           const random = parseInt(base * Math.random())
           const run = async () => {
             try {
-              const hash = DHT.hash(Buffer.from(conf))
+              const hash = DHT.hash(Buffer.from('hyperbolic'+conf))
               const keyPair = crypto.keyPair(crypto.data(Buffer.from(key)));
-              await node.announce('hyperbolic'+hash, keyPair).finished();
+              await node.announce(+hash, keyPair).finished();
               console.log("Announced:", conf, new Date(), hash);
             } catch (e) { }
             setTimeout(run, base + random);

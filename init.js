@@ -13,7 +13,7 @@ const run = (email, address)=>{
   const router = {};
   router[bkey+".sites.247420.xyz"] = "http://localhost:8080";
   router[process.env.domainname+".sites.247420.xyz"] = "http://localhost:8080";
-  router["code."+process.env.domainname] = "http://localhost:8080";
+  router["code."+process.env.domainname+".247420.xyz"] = "http://localhost:8080";
   fs.writeFileSync('../routerconfig.json', JSON.stringify(router));
   fs.writeFileSync('address', bkey+".sites.247420.xyz");
 }

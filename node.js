@@ -13,6 +13,7 @@ require('dotenv').config()
 module.exports = () => {
   const hyperconfig = JSON.parse(fs.readFileSync('../hyperconfig.json'));
   console.log(hyperconfig);
+  const keyPair = crypto.keyPair();
 
 
   const app = express()
@@ -54,7 +55,6 @@ module.exports = () => {
     const done = async () => {
       await node.ready();
       for (let conf of hyperconfig) {
-        const keyPair = crypto.keyPair();
         console.log(conf);
         if (conf) {
           const base = 1000 * 60 * 10;

@@ -1,170 +1,175 @@
+"use strict";
+const fs = require('fs');
+const b32 = require('hi-base32');
+const crypto = require("hypercore-crypto");
+const express = require("express");
+const net = require("net");
+const pump = require("pump");
 const DHT = require("@hyperswarm/dht");
-const node = new DHT();
+const node = new DHT({});
 
-require("dotenv").config();
-const dns2 = require("dns2");
-const { Packet } = require("dns2");
-const b32 = require("hi-base32");
-const fs = require("fs");
-const pending = {};
-const known = {};
-const NodeCache = require("node-cache");
-const cache = new NodeCache();
+require('dotenv').config()
 
-const handle = async (request, send) => {
-    const response = Packet.createResponseFromRequest(request);
-    const [question] = request.questions;
-    let { name } = question;
-    console.log({ name })
-    name = name.toLowerCase();
-    let split = name.split(".");
-    if (!split[split.length - 3]) {
-        return send(response);
+module.exports = () => {
+  const announces = [];
+  const hyperconfig = JSON.parse(fs.readFileSync('../hyperconfig.json'));
+  console.log(hyperconfig);
+  const keyPair = crypto.keyPair();
+
+
+  const app = express()
+  const { createProxyMiddleware } = require('http-proxy-middleware');
+
+  const router = JSON.parse(fs.readFileSync('../routerconfig.json'));
+  const config = JSON.parse(fs.readFileSync('./site/config.json'));
+  let changed;
+  for(let site of Object.keys(router)) {
+    console.log(site, config.sites, config.sites.filter(a=>a.subject===site).length);
+    if(!config.sites.filter(a=>a.subject===site).length) {
+      config.sites.push({subject:site});
+      changed = true;
     }
-
-    const outname = 'hyperbolic' + split[split.length - 3];
-    if (name.endsWith('.in-addr.arpa')) {
-        const response = Packet.createResponseFromRequest(request);
-        response.answers = [
-            {
-                type: Packet.TYPE.PTR,
-                name: question.name.toLowerCase(),
-                domain: 'lan.247420.xyz',
-                class: Packet.CLASS.IN,
-                ttl: 3600,
-            }
-        ];
-        send(response);
-        return;
-    }
-    const cached = cache.get('hyperbolic' + split.join('.'));
-    if (cached) {
-        response.answers = cached.data.answers;
-        return send(response);
-    }
-    if (question.type == Packet.TYPE.AAAA) {
-        return send(response);
-    }
-
-
-    if (!split) {
-        console.log("no name sending early", question);
-        return send(response);
-    }
-
-    let target;
-    let decoded = '';
-    let result;
-    try { decoded = b32.decode.asBytes(name.toUpperCase()) } catch (e) { }
-    if (decoded.length == 32) publicKey = Buffer.from(decoded);
-    else {
-        if (!known[name]) {
-            try {
-                known[name] = JSON.parse(fs.readFileSync('known/' + name));
-                known[name].key = Buffer.from(known[name].keyback, 'hex');
-            } catch (e) {
-            }
-        }
-        if (known[name] && new Date().getTime() - known[name].last < 15 * 60 * 1000) {
-            console.log('key cached from file');
-            const hash = DHT.hash(Buffer.from(outname));
-            result = await toArray(node.lookup(hash));
-        } else {
-            console.log('trying to look it up')
-            const hash = DHT.hash(Buffer.from(outname));
-            console.log("hash is:", outname);
-            result = await toArray(node.lookup(hash));
-            //console.log('result is', JSON.stringify(result, null, 2))
-        }
-        async function toArray(iterable) {
-            const result = []
-            for await (const data of iterable) result.push(data)
-            return result
-        }
-
-        const connectAndGetIp = (target) => {
-            return new Promise(res => {
-                console.log('connecting to', target.toString('hex'));
-                let socket = node.connect(target);
-                socket.write('dns');
-                socket.once("error", function (data) {
-                    send(response);
-                    res();
-                });
-
-                socket.once("data", function (data) {
-                    console.log("PEER RESPONSE", data.toString());
-                    if (!response.authorities.length) {
-                        response.header.aa = 1;
-                    }
-                    send(response);
-                    res(JSON.parse(data)?.host);
-                });
-
-            })
-        }
-
-        if (result.length > 0) {
-            const loopConnections = async () => {
-                let ip;
-                for (res of result) {
-                    for (peer of res.peers) {
-                        //console.log("KNOWN", name, known[name])
-                        if (known[name]?.key == peer.publicKey) {
-                        } else if(known[name]?.key && known[name]?.ip) {
-                            console.log(known[name]);
-                        }
-                        console.log('connecting to ', peer);
-                        if(!known[name]) known[name]={};
-                        known[name].ip = ip = await connectAndGetIp(peer.publicKey);
-
-                        if (ip) {
-                            console.log('IP FOUND', {ip});
-                            known[name] = {};
-                            known[name].last = new Date().getTime();
-                            known[name].key = peer.publicKey;
-                            known[name].keyback = known[name]?.key?.toString('hex');
-                            fs.writeFileSync('known/' + name, JSON.stringify(known[name]));
-                            response.answers.push({
-                                type: Packet.TYPE.A,
-                                name: question.name.toLowerCase(),
-                                address: ip,
-                                class: Packet.CLASS.IN,
-                                ttl: 3600,
-                            });
-                            cache.set('hyperbolic' + split.join('.'), { data: response, time: new Date().getTime() }, 300000);
-                            continue;
-                        }
-                    }
-                    if (ip) continue;
-                }
-            }
-            loopConnections();
-            if (known[name]) target = known[name].key;
-        } else {
-            console.log('no results');
-        }
-    }
-
-    if (!target) {
-        console.log(response.answers);
-        send(response);
-    }
-};
-
-const server = dns2.createServer({
-    udp: true,
-    tcp: true,
-    doh: {
-        ssl: false,
+  }
+  if(changed) fs.writeFileSync('./site/config.json', JSON.stringify(config));
+  const proxy = createProxyMiddleware({
+    router,
+    changeOrigin: true,
+    onProxyReq: (proxyReq, req, res)=>{
+      proxyReq.setHeader('X-Forwarded-Host', req.hostname);
+      proxyReq.setHeader('X-Forwarded-Proto', 'https');
     },
-    handle,
-});
+    ws: true
+  });
+  app.use('/', proxy);
+  require("greenlock-express")
+    .init({
+      packageRoot: __dirname,
+      configDir: "./site/",
+      maintainerEmail: "jon@example.com",
+      cluster: false
+    }).ready(httpsWorker);
+  async function httpsWorker(glx) {
+    let https = 0;
+    let http = 0;
+    let port = 80;
+    let sslport = 443;
+    const done = async () => {
+      await node.ready();
+      for (let conf of hyperconfig) {
+        console.log(conf);
+        if (conf) {
+          const base = 1000 * 60 * 15;
+          const random = parseInt(base * Math.random())
+          const run = async () => {
+            try {
+              const hash = DHT.hash(Buffer.from('hyperbolic'+conf))
+              console.log("Announcing:", 'hyperbolic'+conf, new Date(), hash);
+              await node.announce(hash, keyPair).finished();
+              for(ann in announces) {
+                if(new Date().getTime() - ann.time > 1800000) delete announces[ann];
+              }
+              announces.push({hash, keyPair, time:new Date().getTime()})
+              console.log("Announced:", 'hyperbolic'+conf, new Date(), hash);
+            } catch (e) { 
+              console.log(e);
+            }
+            setTimeout(run, base + random);
+          }
+          await run();
+        }
+        const b32pub = b32.encode(keyPair.publicKey).replace('====', '').toLowerCase();
+        const server = node.createServer();
+        server.on("connection", function (incoming) {
+          incoming.once("data", function (data) {
+            let outgoing;
+            if (data == 'dns') {
+              incoming.write(JSON.stringify({host:node.host}));
+              incoming.end();
+            } else {
+              if (data == 'http') {
+                outgoing = net.connect(http, '127.0.0.1');
+              }
+              if (data == 'https') {
+                outgoing = net.connect(https, '127.0.0.1');
+              }
+              pump(incoming, outgoing, incoming);
+            }
+          });
+        });
+        server.listen(keyPair);
+        console.log('listening', b32pub);
+        console.log('listening on https ' + https);
+        console.log('listening on http ' + http);
+      }
+    }
+    while (!https) {
+      try {
+        console.log('starting https', sslport);
+        await (new Promise((res) => {
+          glx.httpsServer(null, app).listen(sslport, "0.0.0.0", function () {
+            https = sslport;
+            if (http && https) done();
+            res();
+          });
+        }))
+      } catch (e) {
+        sslport = 10240 + parseInt(Math.random() * 10240);
+        console.error(e);
+      }
+      await new Promise(res => { setTimeout(res, 1000) });
+    }
+    while (!http) {
+      try {
+        console.log('starting http', port);
+        await (new Promise((res) => {
+          glx.httpServer().listen(port, "0.0.0.0", function () {
+            http = port;
+            if (http && https) done();
+            res();
+          });
+        }))
+      } catch (e) {
+        port = 10240 + parseInt(Math.random() * 10240);
+        console.error(e);
+      }
+      await new Promise(res => { setTimeout(res, 1000) });
+    }
+  }
 
-server.on("close", () => {
-    console.log("server closed");
-});
 
-server.listen({
-    udp: 53,
-});
+  const unannounce = async ()=>{
+    for(ann of announces) {
+      await node.announce(ann.hash, ann.keyPair).finished();
+    }
+  }
+  
+  process.on("beforeExit", async (code) => {
+    await unannounce();
+    console.log("Process beforeExit event with code: ", code);
+  });
+  
+  process.on("exit", async (code) => {
+    await unannounce();
+    console.log("Process exit event with code: ", code);
+  });
+  
+  process.on("SIGTERM", async (signal) => {
+    await unannounce();
+    console.log(`Process ${process.pid} received a SIGTERM signal`);
+    process.exit(0);
+  });
+  
+  process.on("SIGINT", async (signal) => {
+    await unannounce();
+    console.log(`Process ${process.pid} has been interrupted`);
+    process.exit(0);
+  });
+  
+  process.on("uncaughtException", async (err) => {
+    await unannounce();
+    console.error(`Uncaught Exception: ${err.message}`);
+    process.exit(1);
+  });
+ 
+}
+

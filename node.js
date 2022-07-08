@@ -138,7 +138,7 @@ module.exports = () => {
 
 
   const unannounce = async ()=>{
-    for(ann of announces) {
+    for(let ann of announces) {
       await node.announce(ann.hash, ann.keyPair).finished();
     }
   }

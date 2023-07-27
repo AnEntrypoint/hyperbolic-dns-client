@@ -7,12 +7,13 @@ const net = require("net");
 const pump = require("pump");
 const DHT = require("@hyperswarm/dht");
 const node = new DHT({});
+const { announce, lookup } = require('../discovery.js');
 
 require('dotenv').config()
 
 module.exports = () => {
   const hyperconfig = JSON.parse(fs.readFileSync('../hyperconfig.json'));
-  console.log(hyperconfig);
+  //console.log(hyperconfig);
   const keyPair = crypto.keyPair();
 
 
@@ -22,20 +23,27 @@ module.exports = () => {
   const router = JSON.parse(fs.readFileSync('../routerconfig.json'));
   const config = JSON.parse(fs.readFileSync('./site/config.json'));
   let changed;
-  for(let site of Object.keys(router)) {
-    console.log(site, config.sites, config.sites.filter(a=>a.subject===site).length);
-    if(!config.sites.filter(a=>a.subject===site).length) {
-      config.sites.push({subject:site});
+  for (let site of Object.keys(router)) {
+    //console.log(site, config.sites, config.sites.filter(a => a.subject === site).length);
+    if (!config.sites.filter(a => a.subject === site).length) {
+      config.sites.push({ subject: site });
       changed = true;
     }
   }
-  if(changed) fs.writeFileSync('./site/config.json', JSON.stringify(config));
+  if (changed) fs.writeFileSync('./site/config.json', JSON.stringify(config));
   const proxy = createProxyMiddleware({
     router,
-    changeOrigin: true,
-    onProxyReq: (proxyReq, req, res)=>{
+    changeOrigin: false,
+    secure: false,
+    onProxyReq: (proxyReq, req, res) => {
       proxyReq.setHeader('X-Forwarded-Host', req.hostname);
-      proxyReq.setHeader('X-Forwarded-Proto', 'https');
+      proxyReq.setHeader('X-Forwarded-Proto', 'https'); 
+    },
+    onProxyRes: (proxyRes, req, res) => {
+
+      proxyRes.headers['Cross-Origin-Resource-Policy'] = 'cross-site';
+      //proxyRes.headers['Cross-Origin-Opener-Policy'] = 'same-origin';
+      //proxyRes.headers['Cross-Origin-Embedder-Policy'] = 'require-corp';
     },
     ws: true
   });
@@ -55,23 +63,7 @@ module.exports = () => {
     const done = async () => {
       await node.ready();
       for (let conf of hyperconfig) {
-        console.log(conf);
-        if (conf) {
-          const base = 1000 * 60 * 10;
-          const random = parseInt(base * Math.random())
-          const run = async () => {
-            try {
-              const hash = DHT.hash(Buffer.from('hyperbolic'+conf))
-              console.log("Announcing:", 'hyperbolic'+conf, new Date(), hash);
-              await node.announce(hash, keyPair).finished();
-              console.log("Announced:", 'hyperbolic'+conf, new Date(), hash);
-            } catch (e) { 
-              console.log(e);
-            }
-            setTimeout(run, base + random);
-          }
-          await run();
-        }
+        announce('hyperbolic' + conf, keyPair);
         const b32pub = b32.encode(keyPair.publicKey).replace('====', '').toLowerCase();
         const server = node.createServer();
         server.on("connection", function (incoming) {
@@ -103,7 +95,11 @@ module.exports = () => {
         await (new Promise((res) => {
           glx.httpsServer(null, app).listen(sslport, "0.0.0.0", function () {
             https = sslport;
-            if (http && https) done();
+            if (http && https) {
+              console.log("HTTP AND HTTP STARTED")
+              done();
+              
+            }
             res();
           });
         }))

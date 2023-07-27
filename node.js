@@ -12,6 +12,7 @@ const { announce, lookup } = require('../discovery.js');
 require('dotenv').config()
 
 module.exports = () => {
+  const announces = [];
   const hyperconfig = JSON.parse(fs.readFileSync('../hyperconfig.json'));
   //console.log(hyperconfig);
   const keyPair = crypto.keyPair();
@@ -63,14 +64,38 @@ module.exports = () => {
     const done = async () => {
       await node.ready();
       for (let conf of hyperconfig) {
+<<<<<<< HEAD
         announce('hyperbolic' + conf, keyPair);
+=======
+        console.log(conf);
+        if (conf) {
+          const base = 1000 * 60 * 15;
+          const random = parseInt(base * Math.random())
+          const run = async () => {
+            try {
+              const hash = DHT.hash(Buffer.from('hyperbolic'+conf))
+              console.log("Announcing:", 'hyperbolic'+conf, new Date(), hash);
+              await node.announce(hash, keyPair).finished();
+              for(ann in announces) {
+                if(new Date().getTime() - ann.time > 1800000) delete announces[ann];
+              }
+              announces.push({hash, keyPair, time:new Date().getTime()})
+              console.log("Announced:", 'hyperbolic'+conf, new Date(), hash);
+            } catch (e) { 
+              console.log(e);
+            }
+            setTimeout(run, base + random);
+          }
+          await run();
+        }
+>>>>>>> 05a4360ead8e18e00b96d3817db9684eb64b1809
         const b32pub = b32.encode(keyPair.publicKey).replace('====', '').toLowerCase();
         const server = node.createServer();
         server.on("connection", function (incoming) {
           incoming.once("data", function (data) {
             let outgoing;
             if (data == 'dns') {
-              incoming.write(JSON.stringify(node.remoteAddress()));
+              incoming.write(JSON.stringify({host:node.host}));
               incoming.end();
             } else {
               if (data == 'http') {
@@ -126,5 +151,41 @@ module.exports = () => {
       await new Promise(res => { setTimeout(res, 1000) });
     }
   }
+
+
+  const unannounce = async ()=>{
+    for(let ann of announces) {
+      await node.announce(ann.hash, ann.keyPair).finished();
+    }
+  }
+  
+  process.on("beforeExit", async (code) => {
+    await unannounce();
+    console.log("Process beforeExit event with code: ", code);
+  });
+  
+  process.on("exit", async (code) => {
+    await unannounce();
+    console.log("Process exit event with code: ", code);
+  });
+  
+  process.on("SIGTERM", async (signal) => {
+    await unannounce();
+    console.log(`Process ${process.pid} received a SIGTERM signal`);
+    process.exit(0);
+  });
+  
+  process.on("SIGINT", async (signal) => {
+    await unannounce();
+    console.log(`Process ${process.pid} has been interrupted`);
+    process.exit(0);
+  });
+  
+  process.on("uncaughtException", async (err) => {
+    await unannounce();
+    console.error(`Uncaught Exception: ${err.message}`);
+    process.exit(1);
+  });
+ 
 }
 

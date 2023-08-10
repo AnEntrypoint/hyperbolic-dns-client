@@ -7,7 +7,7 @@ const net = require("net");
 const pump = require("pump");
 const DHT = require("@hyperswarm/dht");
 const node = new DHT({});
-const { announce, lookup } = require('../discovery.js');
+const { announce, lookup } = require('./discovery.js');
 
 require('dotenv').config()
 

@@ -29,6 +29,7 @@ module.exports = {
     announce: (name, keyPair) => {
         const hash = DHT.hash(Buffer.from(name))
         schedule[name] = {hash, keyPair, time: new Date().getTime()}
+        run();
     },
     unannounce: (name)=>{
         const hash = DHT.hash(Buffer.from(name))

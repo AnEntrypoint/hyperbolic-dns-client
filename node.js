@@ -5,7 +5,7 @@ const crypto = require("hypercore-crypto");
 const express = require("express");
 const net = require("net");
 const pump = require("pump");
-const DHT = require("@hyperswarm/dht");
+const DHT = require("hyperdht");
 const node = new DHT({});
 const { announce, lookup } = require('./discovery.js');
 

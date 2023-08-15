@@ -1,7 +1,7 @@
 const sni = require("sni");
 const net = require("net");
 const b32 = require("hi-base32");
-const DHT = require("@hyperswarm/dht");
+const DHT = require("hyperdht");
 const pump = require('pump')
 const node = new DHT({});
 const http = require('http');

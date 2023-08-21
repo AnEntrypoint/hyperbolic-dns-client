@@ -1,6 +1,6 @@
 const POLL_INTERVAL = 5000;
 const schedule = [];
-const base = 1000 * 60 * 15;
+const base = 1000 * 60 * 10;
 const DHT = require('hyperdht');
 const node = new DHT();
 

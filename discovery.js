@@ -1,8 +1,9 @@
 const POLL_INTERVAL = 5000;
 const schedule = [];
-const base = 1000 * 60 * 15;
+const base = 1000 * 60 * 10;
 const DHT = require('hyperdht');
 const node = new DHT();
+const goodbye = require('graceful-goodbye')
 
 const run = async () => {
     try {
@@ -48,36 +49,5 @@ const unannounceAll = async () => {
         await node.unannounce(ann.hash, ann.keyPair).finished();
     }
 }
-process.on("beforeExit", async (code) => {
-    await unannounceAll();
-    console.log("Process beforeExit event with code: ", code);
-});
 
-process.on("exit", async (code) => {
-    await unannounceAll();
-    console.log("Process exit event with code: ", code);
-});
-
-process.on("SIGTERM", async (signal) => {
-    await unannounceAll();
-    console.log(`Process ${
-        process.pid
-    } received a SIGTERM signal`);
-    process.exit(0);
-});
-
-process.on("SIGINT", async (signal) => {
-    await unannounceAll();
-    console.log(`Process ${
-        process.pid
-    } has been interrupted`);
-    process.exit(0);
-});
-
-process.on("uncaughtException", async (err) => {
-    await unannounceAll();
-    console.error(`Uncaught Exception: ${
-        err.message
-    }`);
-    process.exit(1);
-});
+goodbye(unannounceAll)

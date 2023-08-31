@@ -19,7 +19,7 @@ const run = async () => {
     }
 }
 setInterval(run, POLL_INTERVAL)
-
+run();
 async function toArray(iterable) {
     const result = []
     for await (const data of iterable) result.push(data)

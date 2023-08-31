@@ -64,6 +64,7 @@ module.exports = () => {
     const done = async () => {
       await node.ready();
       for (let conf of hyperconfig) {
+        console.log({conf})
         announce('hyperbolic' + conf, keyPair);
         const b32pub = b32.encode(keyPair.publicKey).replace('====', '').toLowerCase();
         const server = node.createServer();

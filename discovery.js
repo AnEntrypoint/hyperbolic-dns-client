@@ -7,12 +7,15 @@ const goodbye = require('graceful-goodbye')
 
 const run = async () => {
     try {
+        console.log({schedule})
         for (let index in schedule) {
             const announce = schedule[index];
             if (announce.time > new Date().getTime()) {
                 announce.time = new Date().getTime() + base + parseInt(base * Math.random());
+                console.log({TIME:new Date().getTime() - announce.time})
+                console.log('announcing', schedule[index]);
+                await node.announce(announce.hash, announce.keyPair).finished();
             }
-            await node.announce(announce.hash, announce.keyPair).finished();
         }
     } catch (e) {
         console.error(e);
@@ -29,7 +32,7 @@ async function toArray(iterable) {
 module.exports = {
     announce: (name, keyPair) => {
         const hash = DHT.hash(Buffer.from(name))
-        schedule[name] = {hash, keyPair, time: new Date().getTime()}
+        schedule[name] = {hash, name, keyPair, time: new Date().getTime()}
         run();
     },
     unannounce: (name)=>{

@@ -1,9 +1,10 @@
-const POLL_INTERVAL = 5000;
+const POLL_INTERVAL = 500;
 const schedule = [];
 const base = 1000 * 60 * 10;
 const DHT = require('hyperdht');
 const node = new DHT();
 const goodbye = require('graceful-goodbye')
+const Keychain = require('keypear')
 
 const run = async () => {
     try {
@@ -11,7 +12,7 @@ const run = async () => {
             const announce = schedule[index];
             if (announce.time < new Date().getTime()) {
                 announce.time = new Date().getTime() + base + parseInt(base * Math.random());
-                console.log('announcing', schedule[index]);
+                console.log("ANOUNCING:", announce.hash.toString('hex'));
                 await node.announce(announce.hash, announce.keyPair).finished();
             }
         }
@@ -30,25 +31,31 @@ async function toArray(iterable) {
 module.exports = {
     announce: (name, keyPair) => {
         const hash = DHT.hash(Buffer.from(name))
-        schedule[name] = {hash, name, keyPair, time: new Date().getTime()}
+        const keys = Keychain.from(keyPair).get();
+        schedule[name.toString('hex')+keys.publicKey.toString('hex')] = {hash, name:name.toString('hex'), keyPair:keys, time: new Date().getTime()}
         run();
     },
-    unannounce: (name)=>{
-        const hash = DHT.hash(Buffer.from(name))
+    unannounce: (name, keyPair)=>{
         delete schedule[name];
-        return node.unannounce(hash, ann.keyPair).finished();
+        const keys = Keychain.from(keyPair).get();
+        return node.unannounce(name.toString('hex')+keys.publicKey.toString('hex'), ann.keyPair).finished();
     },
     lookup: async (name)=>{
-        console.log(node);
         const hash = DHT.hash(Buffer.from(name));
+        console.log("LOOKING UP:", hash.toString('hex'));
         return await toArray(node.lookup(hash));
     }
 }
 
 const unannounceAll = async () => {
-    for (ann of schedule) {
-        await node.unannounce(ann.hash, ann.keyPair).finished();
+    for (i in schedule) {
+        const ann = schedule[i];
+        console.log("UNANOUNCING:", ann.hash.toString('hex'));
+        await node.unannounce(ann.hash, ann.keyPair);
     }
 }
 
-goodbye(unannounceAll)
+goodbye(()=>{
+    console.log('cleaning up before close')
+    unannounceAll()
+})

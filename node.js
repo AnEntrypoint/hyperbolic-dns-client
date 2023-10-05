@@ -41,8 +41,8 @@ module.exports = () => {
       proxyReq.setHeader('X-Forwarded-Proto', 'https'); 
     },
     onProxyRes: (proxyRes, req, res) => {
-
-      proxyRes.headers['Cross-Origin-Resource-Policy'] = 'cross-site';
+      proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+      //proxyRes.headers['Cross-Origin-Resource-Policy'] = 'cross-site';
       //proxyRes.headers['Cross-Origin-Opener-Policy'] = 'same-origin';
       //proxyRes.headers['Cross-Origin-Embedder-Policy'] = 'require-corp';
     },

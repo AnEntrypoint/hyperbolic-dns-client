@@ -1,10 +1,11 @@
 {
-  "name": "hyperbolic-code-server",
+  "name": "hyperbolic-tunnel",
   "version": "1.0.0",
   "description": "",
   "main": "init.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "release": "git commit -a -m ranrelease && npm version $(semver $npm_package_version -i patch) && npm publish --tag latest",
     "start": "node server.js"
   },
   "author": "",
@@ -20,6 +21,7 @@
     "http-proxy-middleware": "^2.0.4",
     "hypercore-crypto": "^3.2.1",
     "hyperdht": "^6.6.1",
+    "keypear": "^1.2.0",
     "net": "^1.0.2",
     "pump": "^3.0.0",
     "sni": "^1.0.0"

@@ -37,7 +37,7 @@ module.exports = {
     },
     unannounce: (name, keyPair)=>{
         delete schedule[name];
-        const keys = Keychain.from(keyPair).get();
+        //const keys = Keychain.from(keyPair).get();
         return node.unannounce(name.toString('hex')+keys.publicKey.toString('hex'), ann.keyPair).finished();
     },
     lookup: async (name)=>{

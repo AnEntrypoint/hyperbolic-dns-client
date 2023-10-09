@@ -7,7 +7,7 @@ const net = require("net");
 const pump = require("pump");
 const DHT = require("hyperdht");
 const node = new DHT({});
-const { announce, lookup } = require('./discovery.js');
+const { announce } = require('hyper-ipc-secure')();
 
 require('dotenv').config()
 
@@ -64,7 +64,7 @@ module.exports = () => {
     const done = async () => {
       await node.ready();
       for (let conf of hyperconfig) {
-        console.log({conf})
+        console.log("ANNOUNCING", conf)
         announce('hyperbolic' + conf, keyPair);
         const b32pub = b32.encode(keyPair.publicKey).replace('====', '').toLowerCase();
         const server = node.createServer();
@@ -128,41 +128,6 @@ module.exports = () => {
       await new Promise(res => { setTimeout(res, 1000) });
     }
   }
-
-
-  const unannounce = async ()=>{
-    for(let ann of announces) {
-      await node.announce(ann.hash, ann.keyPair).finished();
-    }
-  }
-  
-  process.on("beforeExit", async (code) => {
-    await unannounce();
-    console.log("Process beforeExit event with code: ", code);
-  });
-  
-  process.on("exit", async (code) => {
-    await unannounce();
-    console.log("Process exit event with code: ", code);
-  });
-  
-  process.on("SIGTERM", async (signal) => {
-    await unannounce();
-    console.log(`Process ${process.pid} received a SIGTERM signal`);
-    process.exit(0);
-  });
-  
-  process.on("SIGINT", async (signal) => {
-    await unannounce();
-    console.log(`Process ${process.pid} has been interrupted`);
-    process.exit(0);
-  });
-  
-  process.on("uncaughtException", async (err) => {
-    await unannounce();
-    console.error(`Uncaught Exception: ${err.message}`);
-    process.exit(1);
-  });
  
 }
 

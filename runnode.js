@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 (async ()=>{
    const fs = require('fs');
    const node = require('./node.js');

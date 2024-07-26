@@ -14,6 +14,11 @@ const node = new DHT();
 const keyPair = crypto.keyPair();
 
 const run = () => {
+  if(!fs.existsSync('../hyperconfig.json'))  fs.writeFileSync('../hyperconfig.json', JSON.stringify([]));
+  if(!fs.existsSync('site')) fs.mkdirSync('site/', { recursive: true }, (err) => {console.log(err)});
+  if(!fs.existsSync('site/config.json')) fs.writeFileSync('site/config.json', JSON.stringify({sites:[{}], defaults:{subscriberEmail:process.env.email}}));
+  if(!fs.existsSync('../routerconfig.json')) fs.writeFileSync('../routerconfig.json', JSON.stringify({"your-domain-for-code-server.com":"http://localhost:8080"}));
+  
   const hyperconfig = JSON.parse(fs.readFileSync('../hyperconfig.json'));
   const router = JSON.parse(fs.readFileSync('../routerconfig.json'));
   const config = JSON.parse(fs.readFileSync('./site/config.json'));

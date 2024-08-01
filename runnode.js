@@ -2,6 +2,7 @@
 "use strict";
 const fs = require('fs');
 const express = require("express");
+const compression = require("compression");
 const crypto = require("hypercore-crypto");
 const net = require("net");
 const pump = require("pump");
@@ -14,20 +15,15 @@ const node = new DHT();
 const keyPair = crypto.keyPair();
 
 const run = () => {
-  if(!fs.existsSync('../hyperconfig.json'))  fs.writeFileSync('../hyperconfig.json', JSON.stringify([]));
-  if(!fs.existsSync('site')) fs.mkdirSync('site/', { recursive: true }, (err) => {console.log(err)});
-  if(!fs.existsSync('site/config.json')) fs.writeFileSync('site/config.json', JSON.stringify({sites:[{}], defaults:{subscriberEmail:process.env.email}}));
-  if(!fs.existsSync('../routerconfig.json')) fs.writeFileSync('../routerconfig.json', JSON.stringify({"your-domain-for-code-server.com":"http://localhost:8080"}));
-  
   const hyperconfig = JSON.parse(fs.readFileSync('../hyperconfig.json'));
   const router = JSON.parse(fs.readFileSync('../routerconfig.json'));
   const config = JSON.parse(fs.readFileSync('./site/config.json'));
 
-  // Add new sites to the config if not already present
   config.sites.push(...Object.keys(router).filter(site => !config.sites.some(a => a.subject === site)).map(site => ({ subject: site })));
   fs.writeFileSync('./site/config.json', JSON.stringify(config));
 
   const app = express();
+  app.use(compression()); // Enable compression
   const proxy = require('http-proxy-middleware').createProxyMiddleware({
     router,
     changeOrigin: false,
@@ -43,11 +39,11 @@ const run = () => {
   });
 
   app.use('/', proxy);
-  console.log({email:process.env.email})
+  console.log({email: process.env.email});
   require("greenlock-express").init({
     packageRoot: __dirname,
     configDir: "./site/",
-    maintainerEmail: process.env.email||'jon@example.com',
+    maintainerEmail: process.env.email || 'jon@example.com',
     cluster: false
   }).ready(startServers);
 
@@ -55,10 +51,8 @@ const run = () => {
     const [port, sslport] = [80, 443];
     let [httpsRunning, httpRunning] = [false, false];
 
-    // Function to start the server and return a promise
     const startServer = (serverFunc, port) => new Promise(res => serverFunc().listen(port, "0.0.0.0", () => res(port)));
 
-    // Start HTTPS and HTTP servers
     const https = await startServer(() => glx.httpsServer(null, app), sslport);
     httpsRunning = true;
 

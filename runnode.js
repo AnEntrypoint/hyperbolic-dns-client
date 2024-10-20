@@ -6,7 +6,7 @@ const DHT = require("hyperdht");
 const b32 = require('hi-base32');
 const { announce } = require('hyper-ipc-secure')();
 require('dotenv').config();
-
+console.log("Current directory:", __dirname);
 const node = new DHT();
 const keyPair = crypto.keyPair();
 

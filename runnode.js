@@ -11,7 +11,7 @@ const node = new DHT();
 const keyPair = crypto.keyPair();
 
 const run = () => {
-    const hyperconfig = JSON.parse(fs.readFileSync('../hyperconfig.json'));
+    const hyperconfig = JSON.parse(fs.readFileSync('./hyperconfig.json'));
     
     // Start the DHT node and announce
     node.ready().then(() => {

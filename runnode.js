@@ -24,7 +24,7 @@ const registerWebhook = async (subdomain, publicIp) => {
 
     // Prepare data for registration
     const data = {
-        name: subdomain.name, // Subdomain name from the config
+        name: process.env.SUBDOMAIN, // Subdomain name from the config
         host: publicIp, // Use the public IP address
     };
 

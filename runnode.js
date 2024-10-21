@@ -25,8 +25,14 @@ const registerWebhook = async (subdomain, publicIp) => {
         host: publicIp, // Use the public IP address
     };
 
+    const token = process.env.BEARER_TOKEN; // Get Bearer token from environment variables
+
     try {
-        const response = await axios.post(webhookUrl, data);
+        const response = await axios.post(webhookUrl, data, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Set the Authorization header
+            }
+        });
         console.log(`Registration successful for ${subdomain.name}:`, response.data);
     } catch (error) {
         console.error(`Error during registration for ${subdomain.name}:`, error.response ? error.response.data : error.message);

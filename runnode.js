@@ -1,22 +1,28 @@
-#!/usr/bin/env node
+#! /usr/bin/env node
 "use strict";
 const fs = require('fs');
 const axios = require('axios');
-const ip = require('ip'); // Importing the ip package
 require('dotenv').config();
 
 console.log("Current directory:", __dirname);
 
-const registerWebhook = async (subdomain) => {
-    const webhookUrl = process.env.WEBHOOK_URL;  // Get the webhook URL from environment variables
+const getPublicIP = async () => {
+    try {
+        const response = await axios.get('https://icanhazip.com');
+        return response.data.trim();  // Remove any extra whitespace/newline
+    } catch (error) {
+        console.error("Error fetching public IP:", error.message);
+        return null;  // Return null in case of error
+    }
+};
 
-    // Get the client's local IP address
-    const localIp = ip.address(); // Retrieve local IP address
+const registerWebhook = async (subdomain, publicIp) => {
+    const webhookUrl = process.env.WEBHOOK_URL;  // Get the webhook URL from environment variables
 
     // Prepare data for registration
     const data = {
         name: subdomain.name, // Subdomain name from the config
-        host: localIp, // Use the local IP address
+        host: publicIp, // Use the public IP address
     };
 
     try {
@@ -27,21 +33,36 @@ const registerWebhook = async (subdomain) => {
     }
 };
 
-const run = () => {
+const run = async () => {
     // Load hyperconfig from a JSON file
     const hyperconfig = JSON.parse(fs.readFileSync('./hyperconfig.json'));
-    
+
+    // Get the public IP address
+    const publicIp = await getPublicIP();
+
+    // If we couldn't get an IP, exit
+    if (!publicIp) {
+        console.error("Could not retrieve public IP address. Exiting...");
+        return;
+    }
+
     // Register each configuration initially
-    hyperconfig.forEach(subdomain => {
-        registerWebhook(subdomain);
-    });
+    for (const subdomain of hyperconfig) {
+        await registerWebhook(subdomain, publicIp);
+    }
 
     // Periodically re-register each subdomain every minute
-    setInterval(() => {
+    setInterval(async () => {
         console.log("Re-registering...");
-        hyperconfig.forEach(subdomain => {
-            registerWebhook(subdomain);
-        });
+        const newPublicIp = await getPublicIP(); // Fetch the public IP again
+
+        if (newPublicIp) {
+            for (const subdomain of hyperconfig) {
+                await registerWebhook(subdomain, newPublicIp);
+            }
+        } else {
+            console.error("Could not retrieve public IP address during re-registration.");
+        }
     }, 60 * 1000); // 60 * 1000 milliseconds = 1 minute
 };
 

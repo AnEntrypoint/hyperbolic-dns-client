@@ -24,7 +24,7 @@ const registerWebhook = async (subdomain, publicIp) => {
 
     // Prepare data for registration
     const data = {
-        name: process.env.SUBDOMAIN, // Subdomain name from the config
+        name: subdomain, // Subdomain name from the config
         host: publicIp, // Use the public IP address
     };
 
@@ -60,7 +60,7 @@ const run = async () => {
 
     // Register each configuration initially
     for (const subdomain of hyperconfig) {
-        console.debug("Registering subdomain:", subdomain.name);
+        console.debug("Registering subdomain:", subdomain);
         await registerWebhook(subdomain, publicIp);
     }
 

@@ -7,8 +7,10 @@ require('dotenv').config();
 console.log("Current directory:", __dirname);
 
 const getPublicIP = async () => {
+    console.debug("Attempting to fetch public IP...");
     try {
         const response = await axios.get('https://icanhazip.com');
+        console.debug("Public IP fetched successfully:", response.data.trim());
         return response.data.trim();  // Remove any extra whitespace/newline
     } catch (error) {
         console.error("Error fetching public IP:", error.message);
@@ -18,6 +20,7 @@ const getPublicIP = async () => {
 
 const registerWebhook = async (subdomain, publicIp) => {
     const webhookUrl = process.env.WEBHOOK_URL;  // Get the webhook URL from environment variables
+    console.debug("Preparing to register webhook for subdomain:", subdomain.name);
 
     // Prepare data for registration
     const data = {
@@ -26,6 +29,8 @@ const registerWebhook = async (subdomain, publicIp) => {
     };
 
     const token = process.env.BEARER_TOKEN; // Get Bearer token from environment variables
+    console.debug("Using webhook URL:", webhookUrl);
+    console.debug("Using Bearer token:", token ? "Provided" : "Not provided");
 
     try {
         const response = await axios.post(webhookUrl, data, {
@@ -40,8 +45,9 @@ const registerWebhook = async (subdomain, publicIp) => {
 };
 
 const run = async () => {
-    // Load hyperconfig from a JSON file
+    console.debug("Loading hyperconfig from JSON file...");
     const hyperconfig = JSON.parse(fs.readFileSync('./hyperconfig.json'));
+    console.debug("Hyperconfig loaded:", hyperconfig);
 
     // Get the public IP address
     const publicIp = await getPublicIP();
@@ -54,6 +60,7 @@ const run = async () => {
 
     // Register each configuration initially
     for (const subdomain of hyperconfig) {
+        console.debug("Registering subdomain:", subdomain.name);
         await registerWebhook(subdomain, publicIp);
     }
 
@@ -63,7 +70,9 @@ const run = async () => {
         const newPublicIp = await getPublicIP(); // Fetch the public IP again
 
         if (newPublicIp) {
+            console.debug("New public IP retrieved:", newPublicIp);
             for (const subdomain of hyperconfig) {
+                console.debug("Re-registering subdomain:", subdomain.name);
                 await registerWebhook(subdomain, newPublicIp);
             }
         } else {

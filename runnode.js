@@ -1,43 +1,41 @@
 #! /usr/bin/env node
 "use strict";
 const fs = require('fs');
-const crypto = require("hypercore-crypto");
-const DHT = require("hyperdht");
-const { announce } = require('hyper-ipc-secure')();
+const axios = require('axios');
 require('dotenv').config();
-const b32 = require('hi-base32');
 
 console.log("Current directory:", __dirname);
-const node = new DHT();
-const keyPair = crypto.keyPair();
 
-const registerSubdomain = async (subdomain) => {
-    const topic = Buffer.from(`hyperbolic${subdomain}`);
-    const subdomainData = {
-        publicKey: keyPair.publicKey,
-        createdAt: Date.now(),
-        subdomain: subdomain
-    };
+const registerWebhook = async (data) => {
+    const bearerToken = process.env.BEARER_TOKEN; // Get the token from environment variables
+    const webhookUrl = process.env.WEBHOOK_URL;  // Get the webhook URL from environment variables
 
-    // Announce the subdomain to the DHT
     try {
-        await node.mutablePut(keyPair, Buffer.from(JSON.stringify(subdomainData)));
-        announce(subdomain, keyPair);
-        console.log(`Subdomain "${subdomain}" registered with key pair: ${b32.encode(keyPair.publicKey).replace(/=/g, '').toLowerCase()}`);
+        const response = await axios.post(webhookUrl, data, {
+            headers: {
+                'Authorization': `Bearer ${bearerToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log("Registration successful:", response.data);
     } catch (error) {
-        console.error(`Failed to register subdomain "${subdomain}":`, error);
+        console.error("Error during registration:", error.response ? error.response.data : error.message);
     }
 };
 
-const run = async () => {
+const run = () => {
     const hyperconfig = JSON.parse(fs.readFileSync('./hyperconfig.json'));
-
-    Node.ready().then(async () => {
-        for (let conf of hyperconfig) {
-            console.log("Announcing configuration for:", conf);
-            await registerSubdomain(conf);
-        }
-    }).catch(console.error);
+    
+    // Register each configuration through the webhook
+    for (let conf of hyperconfig) {
+        const data = {
+            name: conf, // Use `conf` or modify as needed to send what you need
+            host: 'your-host-name', // Replace with real host or retrieve as needed
+        };
+        
+        console.log("Registering...", data);
+        registerWebhook(data);
+    }
 };
 
 run();
